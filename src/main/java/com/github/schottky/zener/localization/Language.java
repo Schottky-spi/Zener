@@ -127,13 +127,13 @@ public class Language {
 
     // ------------------------------------------------ Input-Validation -----------------------------------------------
 
-    private static final Pattern VALID_INPUT = Pattern.compile("([a-z]|_)+(?:\\.([a-z]|_)+)*");
+    private static final Pattern VALID_INPUT = Pattern.compile("([a-z0-9]|_)+(?:\\.([a-z0-9]|_)+)*");
     private static final Pattern DOT = Pattern.compile("\\.");
 
     /**
      * Returns true, if a certain identifier is valid, or not.
      * <br>A valid identifier is a dot-separated ('.') String that may
-     * only contain lowercase letters and underscores. A dot may not occur at the very
+     * only contain lowercase letters, underscores and numbers. A dot may not occur at the very
      * beginning or end.
      * <br>Examples for valid identifiers:
      * <ul>

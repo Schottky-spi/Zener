@@ -63,9 +63,10 @@ class LanguageTest {
     class An_identifier_is_correct {
 
         @Test
-        void if_it_consists_of_lowercase_letters_and_underscores() {
+        void if_it_consists_of_lowercase_letters_underscores_and_numbers() {
             assertTrue(Language.isValidIdentifier("some"));
             assertTrue(Language.isValidIdentifier("__som__e_"));
+            assertTrue(Language.isValidIdentifier("1identifier_2"));
         }
 
         @Test
