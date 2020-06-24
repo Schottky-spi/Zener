@@ -1,4 +1,4 @@
-package de.schottky.zener.util;
+package com.github.zener.util;
 
 import org.jetbrains.annotations.NotNull;
 

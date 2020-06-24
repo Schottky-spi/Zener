@@ -1,4 +1,4 @@
-package de.schottky.zener.command;
+package com.github.schottky.zener.command;
 
 import org.bukkit.permissions.PermissionDefault;
 

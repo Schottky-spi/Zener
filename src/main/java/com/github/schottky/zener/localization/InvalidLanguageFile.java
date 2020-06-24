@@ -1,4 +1,4 @@
-package de.schottky.zener.localization;
+package com.github.schottky.zener.localization;
 
 public class InvalidLanguageFile extends Exception {
 

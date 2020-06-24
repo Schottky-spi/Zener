@@ -1,4 +1,4 @@
-package de.schottky.zener.localization;
+package com.github.schottky.zener.localization;
 
 import com.google.gson.JsonObject;
 import org.bukkit.ChatColor;
@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -256,10 +258,12 @@ class LanguageTest {
                     Language.fromFile(getResource("de.yaml")));
         }
 
-        @NotNull
+        @Nullable
         @Contract("_ -> new")
         private File getResource(String name) {
-            return new File(getClass().getClassLoader().getResource(name).getFile());
+            URL url = getClass().getClassLoader().getResource(name);
+            if (url != null) return new File(url.getFile());
+            return null;
         }
     }
 

@@ -1,10 +1,9 @@
-package de.schottky.zener.localization;
+package com.github.schottky.zener.localization;
 
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

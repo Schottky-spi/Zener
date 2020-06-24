@@ -1,4 +1,4 @@
-package de.schottky.zener.localization;
+package com.github.schottky.zener.localization;
 
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.Contract;

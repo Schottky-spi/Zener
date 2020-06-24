@@ -1,4 +1,4 @@
-package de.schottky.zener.localization;
+package com.github.schottky.zener.localization;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

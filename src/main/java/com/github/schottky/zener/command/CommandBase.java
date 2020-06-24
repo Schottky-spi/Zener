@@ -1,9 +1,9 @@
-package de.schottky.zener.command;
+package com.github.schottky.zener.command;
 
-import de.schottky.zener.localization.Language;
-import de.schottky.zener.util.ArrayUtil;
-import de.schottky.zener.util.CollectionUtil;
-import de.schottky.zener.util.ReflectionUtil;
+import com.github.schottky.zener.localization.Language;
+import com.github.zener.util.ArrayUtil;
+import com.github.zener.util.CollectionUtil;
+import com.github.zener.util.ReflectionUtil;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
