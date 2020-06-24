@@ -1,5 +1,6 @@
 package com.github.schottky.zener.localization;
 
+import com.github.schottky.zener.util.Tuple;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.gson.GsonBuilder;
@@ -10,6 +11,7 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,9 +105,7 @@ public class Language {
      * @param current The new language to use
      */
 
-    public static void setCurrent(@NotNull Language current) {
-        Language.current = Objects.requireNonNull(current);
-    }
+    public static void setCurrent(@NotNull Language current) { Language.current = current; }
 
     // -------------------------------------------------- Color-code ---------------------------------------------------
 
@@ -388,6 +388,36 @@ public class Language {
         return object;
     }
 
+
+    @NotNull
+    public static Language forPluginWithFallback(
+            @NotNull Plugin plugin,
+            Locale locale,
+            File parentDirectory,
+            LanguageFile.StorageProvider storageProvider,
+            String defaultResourceName,
+            String fallbackResource)
+    {
+        LanguageFile languageFile = new LanguageFile(parentDirectory, locale, storageProvider);
+        if (languageFile.exists()) {
+            try {
+                return Language.fromFile(languageFile);
+            } catch (FileNotFoundException ignored) {}
+        }
+
+        try {
+            Tuple<Locale, LanguageFile.StorageProvider> nameComponents = LanguageFile.componentsOf(defaultResourceName);
+            InputStream is = plugin.getResource(fallbackResource);
+            if (is == null) {
+                is = Objects.requireNonNull(plugin.getResource(fallbackResource));
+                nameComponents = LanguageFile.componentsOf(fallbackResource);
+            }
+            return readFrom(new InputStreamReader(is), nameComponents.first(), nameComponents.second());
+        } catch (InvalidLanguageDescription exception) {
+            throw new Error(exception);
+        }
+    }
+
     @NotNull
     @Contract("_, _ -> new")
     public static Language fromConfigurationSection(@NotNull ConfigurationSection section, Locale locale) {
@@ -412,13 +442,72 @@ public class Language {
     // --------------------------------------------------- File I/O ----------------------------------------------------
 
     @NotNull
-    public static Language fromFile(File file) throws InvalidLanguageFile, FileNotFoundException {
-        LanguageFile languageFile = LanguageFile.fromIOFile(file);
-        return readFrom(new FileReader(file), languageFile.locale(), languageFile.storageProvider());
+    public static Language fromFile(File file) throws InvalidLanguageDescription, FileNotFoundException {
+        return fromFile(LanguageFile.fromIOFile(file));
+    }
+
+    /**
+     * Tries to find a certain file for a given locale in the parent-directory.
+     * <br>A valid language-file is characterized by three conditions:
+     * <ul>
+     *     <li>The language-name must equal to the given locale's language-tag ({@link Locale#toLanguageTag()})
+     *     <li>The file-ending must be a valid storage-provider (such valid storage-providers are all of
+     *     {@link LanguageFile.StorageProvider}
+     *     <li>From the conditions above, the file-name; if split by the character '.' may only contain
+     *     one or two elements
+     * </ul>
+     * If the parent does not represent a directory, this will return an empty optional.
+     *
+     * @param locale The locale to find the language for
+     * @param parent Where to look for the file
+     * @return The language, if it was found, en empty optional otherwise
+     */
+
+    public static Optional<Language> findFileForLocale(Locale locale, @NotNull File parent) {
+        if (!parent.isDirectory()) return Optional.empty();
+        String[] files = Objects.requireNonNull(parent.list((dir, name) -> {
+            String[] components = DOT.split(name);
+            if (components.length == 1) return components[0].equals(locale.toLanguageTag());
+            if (components.length == 2) return components[0].equals(locale.toLanguageTag()) &&
+                    LanguageFile.StorageProvider.fromFileEnding(components[1]).isPresent();
+            return false;
+        }));
+        if (files.length != 1) return Optional.empty();
+        try {
+            Language language = fromFile(new File(parent, files[0]));
+            return Optional.of(language);
+        } catch (InvalidLanguageDescription | FileNotFoundException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * returns a language from a resource (a resource can be found in the "resources"-directory inside the
+     * compiled .jar-file). If the desired resource-name does not exist or doesn't represent a valid
+     * language, returns an empty optional.
+     *
+     * @param plugin The plugin to get the language for
+     * @param resourceName The name of the resource. This name must be fully written (e.g. "en-us.lang", not "en-us")
+     * @return The Language, if it was present, or an empty optional
+     */
+
+    public static Optional<Language> fromResources(@NotNull Plugin plugin, String resourceName) {
+        InputStream inputStream = plugin.getResource(resourceName);
+        if (inputStream == null) return Optional.empty();
+        try {
+            Tuple<Locale, LanguageFile.StorageProvider> components = LanguageFile.componentsOf(resourceName);
+            return Optional.of(readFrom(new InputStreamReader(inputStream), components.first(), components.second()));
+        } catch (InvalidLanguageDescription exception) {
+            return Optional.empty();
+        }
+    }
+
+    public static Language fromFile(@NotNull LanguageFile file) throws FileNotFoundException {
+        return readFrom(new FileReader(file.toIOFile()), file.locale(), file.storageProvider());
     }
 
     public void saveToFile(@NotNull File file, LanguageFile.StorageProvider storageProvider) throws IOException {
-        LanguageFile languageFile = new LanguageFile(file.getParentFile(), this.locale(), storageProvider);
+        LanguageFile languageFile = new LanguageFile(file.getParentFile(), this.locale, storageProvider);
         writeTo(new FileWriter(languageFile.toIOFile()), storageProvider);
     }
 

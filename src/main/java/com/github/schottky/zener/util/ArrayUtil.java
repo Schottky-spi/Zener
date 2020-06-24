@@ -1,4 +1,4 @@
-package com.github.zener.util;
+package com.github.schottky.zener.util;
 
 public final class ArrayUtil {
 

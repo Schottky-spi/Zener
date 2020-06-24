@@ -25,8 +25,8 @@ class LanguageFileTest {
 
     @Test
     void throws_if_incorrect_io_file() {
-        assertThrows(InvalidLanguageFile.class, () -> LanguageFile.fromIOFile(new File("en.us.lang")));
-        assertThrows(InvalidLanguageFile.class, () -> LanguageFile.fromIOFile(new File("en-us.json")));
+        assertThrows(InvalidLanguageDescription.class, () -> LanguageFile.fromIOFile(new File("en.us.lang")));
+        assertThrows(InvalidLanguageDescription.class, () -> LanguageFile.fromIOFile(new File("en-us.json")));
     }
 
     @Test

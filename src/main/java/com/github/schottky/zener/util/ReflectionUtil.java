@@ -1,4 +1,4 @@
-package com.github.zener.util;
+package com.github.schottky.zener.util;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;

@@ -251,7 +251,7 @@ class LanguageTest {
     class A_language_can_be_loaded {
 
         @Test
-        void from_a_file() throws InvalidLanguageFile, FileNotFoundException {
+        void from_a_file() throws InvalidLanguageDescription, FileNotFoundException {
             System.out.println();
             assertEquals(us(), Language.fromFile(getResource("en-us.lang")));
             assertEquals(new Language(rawMap(), Locale.GERMAN),

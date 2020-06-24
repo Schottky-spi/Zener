@@ -1,5 +1,6 @@
 package com.github.schottky.zener.localization;
 
+import com.github.schottky.zener.util.Tuple;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -24,25 +25,30 @@ public class LanguageFile {
      * a list of possible file-types
      * @param file The file to generate the LanguageFile for
      * @return The LanguageFile representing the {@code java.io.File}
-     * @throws InvalidLanguageFile if the file's path does not conform to the format mentioned above
+     * @throws InvalidLanguageDescription if the file's path does not conform to the format mentioned above
      */
 
     @NotNull
     @Contract("_ -> new")
-    public static LanguageFile fromIOFile(@NotNull File file) throws InvalidLanguageFile {
-        String[] nameComponents = file.getName().split("\\.");
+    public static LanguageFile fromIOFile(@NotNull File file) throws InvalidLanguageDescription {
+        Tuple<Locale,StorageProvider> components = componentsOf(file.getName());
+        return new LanguageFile(file.getParentFile(), components.first(), components.second());
+    }
+
+    @NotNull
+    // package-private so that Language.class may use this
+    static Tuple<Locale,StorageProvider> componentsOf(@NotNull String resourceName) throws InvalidLanguageDescription {
+        String[] components = resourceName.split("\\.");
         StorageProvider provider;
-        if (nameComponents.length == 1) {
+        if (components.length == 1) {
             provider = StorageProvider.JSON;
-        } else if (nameComponents.length == 2) {
-            provider = StorageProvider.fromFileEnding(nameComponents[1]).orElseThrow(() ->
-                    new InvalidLanguageFile("invalid language file-ending: " + nameComponents[1]));
+        } else if (components.length == 2) {
+            provider = StorageProvider.fromFileEnding(components[1]).orElseThrow(() ->
+                    new InvalidLanguageDescription("invalid language file-ending: " + components[1]));
         } else {
-            throw new InvalidLanguageFile("Invalid file-format");
+            throw new InvalidLanguageDescription("Invalid file-format");
         }
-        return new LanguageFile(file.getParentFile(),
-                Locale.forLanguageTag(nameComponents[0]),
-                provider);
+        return Tuple.of(Locale.forLanguageTag(components[0]), provider);
     }
 
     private final File parent;
@@ -90,6 +96,10 @@ public class LanguageFile {
 
     public StorageProvider storageProvider() {
         return storageProvider;
+    }
+
+    public boolean exists() {
+        return toIOFile().exists();
     }
 
     @Override
