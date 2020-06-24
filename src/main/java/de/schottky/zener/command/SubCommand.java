@@ -1,0 +1,31 @@
+package de.schottky.zener.command;
+
+public abstract class SubCommand extends CommandBase {
+
+    protected final CommandBase parentCommand;
+
+    public SubCommand(CommandBase parentCommand) {
+        this.parentCommand = parentCommand;
+    }
+
+    /**
+     * returns the amount of parent-commands this class has.
+     * This is implemented recursively by simply adding one to the
+     * parent's depth-method.
+     * The Base-class will return 0
+     * @return The depth of it's parent plus one
+     */
+
+    @Override
+    int computeDepth() {
+        return 1 + this.parentCommand.computeDepth();
+    }
+
+    @Override
+    public String toString() {
+        return "SubCommand{" +
+                "name='" + name + "', " +
+                "parentCommand=" + parentCommand +
+                '}';
+    }
+}

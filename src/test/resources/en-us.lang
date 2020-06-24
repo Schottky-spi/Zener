@@ -1,0 +1,6 @@
+{
+  "some.identifier": "identifier 1",
+  "some.other.identifier": "{identifier} 2",
+  "yet.another.identifier": "identifier 3",
+  "identifier.with.replacements": "{greeting}, {what}!"
+}
