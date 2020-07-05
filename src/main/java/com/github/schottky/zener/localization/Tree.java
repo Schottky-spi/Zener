@@ -75,10 +75,10 @@ class Tree<V,E> {
     }
 
     private void traverse(
-            Set<Node<V,E>> visitedNodes,
-            @NotNull Node<V,E> current,
-            List<V> path,
-            Set<Path<V,E>> allPaths,
+            final Set<Node<V,E>> visitedNodes,
+            final @NotNull Node<V,E> current,
+            final List<V> path,
+            final Set<Path<V,E>> allPaths,
             final int limit)
     {
         if (current.isBranching()) {
@@ -109,14 +109,6 @@ class Tree<V,E> {
         public Path(Iterable<V> edges, E leafValue) {
             this.edges = ImmutableList.copyOf(edges);
             this.leafValue = leafValue;
-        }
-
-        public List<V> edges() {
-            return edges;
-        }
-
-        public E leafValue() {
-            return leafValue;
         }
 
         @Override
@@ -189,7 +181,7 @@ class Tree<V,E> {
             adjacentNodes.forEach((name, node) -> builder
                     .append(name)
                     .append("=")
-                    .append(node.isBranching() ? "BranchingNode{...}" : node.toString()));
+                    .append(node.isBranching() ? "BranchingNode{...}" : node.value));
             builder.append('}');
             return builder.toString();
         }

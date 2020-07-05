@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,17 +64,16 @@ class LanguageTest {
     @Nested
     class An_identifier_is_correct {
 
-        @Test
-        void if_it_consists_of_lowercase_letters_underscores_and_numbers() {
-            assertTrue(Language.isValidIdentifier("some"));
-            assertTrue(Language.isValidIdentifier("__som__e_"));
-            assertTrue(Language.isValidIdentifier("1identifier_2"));
+        @ParameterizedTest
+        @ValueSource(strings = {"some", "__som_e_", "1identifier_2"})
+        void if_it_consists_of_lowercase_letters_underscores_and_numbers(String value) {
+            assertTrue(Language.isValidIdentifier(value));
         }
 
-        @Test
-        void if_it_contains_dot_separated_identifiers() {
-            assertTrue(Language.isValidIdentifier("some.random.identifier"),"legal sequence");
-            assertTrue(Language.isValidIdentifier("_some_.random.ident_ifier"),"legal sequence with under-bars");
+        @ParameterizedTest
+        @ValueSource(strings = {"some.random.identifier", "_some_.random.ident_ifier"})
+        void if_it_contains_dot_separated_identifiers(String value) {
+            assertTrue(Language.isValidIdentifier(value));
         }
     }
 
@@ -84,23 +85,22 @@ class LanguageTest {
             assertFalse(Language.isValidIdentifier(""));
         }
 
-        @Test
-        void if_it_contains_illegal_characters() {
-            assertFalse(Language.isValidIdentifier("some.Identifier"));
-            assertFalse(Language.isValidIdentifier("some.identifier&"));
-            assertFalse(Language.isValidIdentifier("some-identifier"));
+        @ParameterizedTest
+        @ValueSource(strings = {"some.Identifier", "some.identifier&", "some-identifier"})
+        void if_it_contains_illegal_characters(String value) {
+            assertFalse(Language.isValidIdentifier(value));
         }
 
-        @Test
-        void if_a_dot_is_at_the_start_or_end() {
-            assertFalse(Language.isValidIdentifier(".some.identifier"));
-            assertFalse(Language.isValidIdentifier("some.identifier."));
+        @ParameterizedTest
+        @ValueSource(strings = {".some.identifier", "some.identifier."})
+        void if_a_dot_is_at_the_start_or_end(String value) {
+            assertFalse(Language.isValidIdentifier(value));
         }
 
-        @Test
-        void if_there_are_two_ore_more_dots_in_sequence() {
-            assertFalse(Language.isValidIdentifier("some..identifier"));
-            assertFalse(Language.isValidIdentifier("some.other...identifier"));
+        @ParameterizedTest
+        @ValueSource(strings = {"some..identifier", "some.other...identifier"})
+        void if_there_are_two_ore_more_dots_in_sequence(String value) {
+            assertFalse(Language.isValidIdentifier(value));
         }
     }
 
@@ -152,7 +152,6 @@ class LanguageTest {
         }
     }
 
-    // TODO: refactor to readability
     public static class Throws {
 
         @Test

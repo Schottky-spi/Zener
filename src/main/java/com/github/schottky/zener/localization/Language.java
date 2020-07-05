@@ -144,7 +144,7 @@ public class Language {
      * <br>Examples for invalid identifiers:
      * <ul>
      *     <li>foo.Bar
-     *     <li>foo.42bar
+     *     <li>foo.&bar
      *     <li>.foo.bar
      * </ul>
      * @param input the input to check
@@ -217,6 +217,10 @@ public class Language {
         return ChatColor.translateAlternateColorCodes(colorChar, translated);
     }
 
+    public String translate(@NotNull Localizable localizable) {
+        return translate(localizable.identifier());
+    }
+
     /**
      * returns true if, and only if this language contains a mapping for a given identifier,
      * in other words {@link Language#translate(String)} would return the mapped text.
@@ -264,8 +268,9 @@ public class Language {
     public String translateWithExtra(@NotNull String identifier, @NotNull Map<String,Object> extra) {
         String translated = translate(identifier);
         for (Map.Entry<String,Object> extraEntry: extra.entrySet()) {
-            translated = translated.replace("{" + extraEntry.getKey() + "}",
-                    Objects.toString(extraEntry.getValue()));
+            Object value = extraEntry.getValue();
+            String translatedValue = value instanceof Localizable ? translate((Localizable) value) : Objects.toString(value);
+            translated = translated.replace("{" + extraEntry.getKey() + "}", translatedValue);
         }
         return translated;
     }
@@ -351,6 +356,13 @@ public class Language {
         }
     }
 
+    public static Language readFrom(
+            Reader reader,
+            @NotNull Tuple<Locale,LanguageFile.StorageProvider> components)
+    {
+        return readFrom(reader, components.first(), components.second());
+    }
+
     public void writeTo(
             Writer writer,
             @NotNull LanguageFile.StorageProvider usedStorageProvider) throws IOException {
@@ -388,16 +400,52 @@ public class Language {
         return object;
     }
 
+    /**
+     * Attempts to get a language for a plugin. In order to do this, this method will search in different locations to
+     * find the desired language. The steps are as follows:
+     * <br> First, the plugin will try to find the file inside the plugin's data-folder ({@link Plugin#getDataFolder()}
+     * and any sub-folders if so desired by the option {@link Option#PARENT_DIR}
+     * <br> Then, the plugin will try to find the language inside the {@code resources}-directory of the jar
+     * (as if by calling {@link Plugin#getResource(String)} with the string being
+     * <pre>{@code locale.toLanguageTag() + '.' + storageProvider.fileEnding}</pre>
+     * A directory can also be specified using the
+     * option {@link Option#RESOURCE_LOC}
+     * <br>If the language couldn't be found in any of these locations, a fallback-resource will be taken. This has to
+     * be present inside the resources-directory and defaults to "en-us.lang". This can be customized using the option
+     * {@link Option#FALLBACK}. If this fallback does not exist, a {@code NullPointerException} will be thrown.
+     * <br> Options, for example the parent-dir, can be specified using the syntax {@code Option.PARENT_DIR.set("/lang")}
+     * @param plugin The plugin to get the language for
+     * @param locale The desired locale
+     * @param storageProvider The storage-provider to use (.lang, .yml,...)
+     * @param options options to configure where to look for the language-files
+     * @return A Language for the desired locale with the specified storage-provider, or the fallback if none was found
+     * @throws NullPointerException if the fallback does not exist
+     */
+
 
     @NotNull
-    public static Language forPluginWithFallback(
+    public static Language forPlugin(
             @NotNull Plugin plugin,
-            Locale locale,
-            File parentDirectory,
-            LanguageFile.StorageProvider storageProvider,
-            String defaultResourceName,
-            String fallbackResource)
+            @NotNull Locale locale,
+            LanguageFile.@NotNull StorageProvider storageProvider,
+            Language.Option @NotNull ... options)
     {
+        File parentDirectory = plugin.getDataFolder();
+        StringBuilder resourceLocation = new StringBuilder(locale.toLanguageTag()).append('.').append(storageProvider.fileEnding);
+        String fallbackResource = "en-us.lang";
+        for (Option option: options) {
+            switch (option) {
+                case PARENT_DIR:
+                    parentDirectory = new File(parentDirectory, option.value);
+                    break;
+                case RESOURCE_LOC:
+                    resourceLocation.insert(0, option.value + "/");
+                    break;
+                case FALLBACK:
+                    fallbackResource = option.value;
+                    break;
+            }
+        }
         LanguageFile languageFile = new LanguageFile(parentDirectory, locale, storageProvider);
         if (languageFile.exists()) {
             try {
@@ -406,8 +454,9 @@ public class Language {
         }
 
         try {
-            Tuple<Locale, LanguageFile.StorageProvider> nameComponents = LanguageFile.componentsOf(defaultResourceName);
-            InputStream is = plugin.getResource(fallbackResource);
+            String resource = resourceLocation.toString();
+            Tuple<Locale, LanguageFile.StorageProvider> nameComponents = LanguageFile.componentsOf(resource);
+            InputStream is = plugin.getResource(resource);
             if (is == null) {
                 is = Objects.requireNonNull(plugin.getResource(fallbackResource));
                 nameComponents = LanguageFile.componentsOf(fallbackResource);
@@ -415,6 +464,46 @@ public class Language {
             return readFrom(new InputStreamReader(is), nameComponents.first(), nameComponents.second());
         } catch (InvalidLanguageDescription exception) {
             throw new Error(exception);
+        }
+    }
+
+    /**
+     * Valid options to specify where to look for a certain language-file in a certain context.
+     * Options can be used like {@code Option opt = Option.<yourOption>.set("foo")}.
+     * Every option has a default value of common use-cases. This will be used, if the option is
+     * specified without setting it (calling it's {@link Option#set(String)} method).
+     */
+
+    public enum Option {
+        /**
+         * where to look for in the plugin-folder. Defaults to "lang"
+         */
+        PARENT_DIR("lang"),
+        /**
+         * where to look for in the resources-folder. Defaults to "lang"
+         * A trailing File-separator ("/") must not be inserted
+         */
+        RESOURCE_LOC("lang"),
+        /**
+         * Where to find the fallback-resource, defaults to "en-us.lang)
+         */
+        FALLBACK("en-us.lang");
+
+        String value;
+
+        Option(String defaultValue) {
+            this.value = defaultValue;
+        }
+
+        /**
+         * sets the value of this option; meaning where to look for when creating a file for a plugin
+         * @param value The value to set
+         * @return This option with modified state
+         */
+
+        public Option set(String value) {
+            this.value = value;
+            return this;
         }
     }
 
@@ -431,7 +520,7 @@ public class Language {
 
     public YamlConfiguration toYamlConfiguration() {
         YamlConfiguration configuration = new YamlConfiguration();
-        asRawMap(-1).forEach(configuration::set);
+        this.asRawMap(-1).forEach(configuration::set);
         return configuration;
     }
 
