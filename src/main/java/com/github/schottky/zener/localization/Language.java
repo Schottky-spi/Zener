@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -458,6 +459,9 @@ public class Language {
             Tuple<Locale, LanguageFile.StorageProvider> nameComponents = LanguageFile.componentsOf(resource);
             InputStream is = plugin.getResource(resource);
             if (is == null) {
+                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "Desired language '" + locale +
+                        "' can neither be found inside the plugin-folder nor the resources-folder");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "Falling back to locale " + fallbackResource);
                 is = Objects.requireNonNull(plugin.getResource(fallbackResource));
                 nameComponents = LanguageFile.componentsOf(fallbackResource);
             }

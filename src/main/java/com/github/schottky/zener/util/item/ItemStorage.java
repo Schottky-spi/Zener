@@ -5,6 +5,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -71,6 +72,10 @@ public final class ItemStorage {
         return OptionalLong.of(value);
     }
 
+    public static Optional<String> getString(@Nullable ItemMeta meta, NamespacedKey key) {
+        return Optional.ofNullable(get(meta, PersistentDataType.STRING, key));
+    }
+
     //----------------------------------------------------Defaults------------------------------------------------------
 
     /**
@@ -93,6 +98,10 @@ public final class ItemStorage {
         return getLong(meta, key).orElse(def);
     }
 
+    public static String getString(@Nullable ItemMeta meta, NamespacedKey key, String def) {
+        return getString(meta, key).orElse(def);
+    }
+
     //-----------------------------------------------------Setters------------------------------------------------------
 
     public static void set(@Nullable ItemMeta meta, int i, NamespacedKey key) {
@@ -107,6 +116,10 @@ public final class ItemStorage {
         set(meta, PersistentDataType.LONG, key, l);
     }
 
+    public static void set(@Nullable ItemMeta meta, String s, NamespacedKey key) {
+        set(meta, PersistentDataType.STRING, key, s);
+    }
+
     //-----------------------------------------------------Checkers-----------------------------------------------------
 
     public static boolean hasInt(@Nullable ItemMeta meta, NamespacedKey key) {
@@ -119,6 +132,10 @@ public final class ItemStorage {
 
     public static boolean hasLong(@Nullable ItemMeta meta, NamespacedKey key) {
         return has(meta, PersistentDataType.LONG, key);
+    }
+
+    public static boolean hasString(@Nullable ItemMeta meta, NamespacedKey key) {
+        return has(meta, PersistentDataType.STRING, key);
     }
 
     //--------------------------------------------------Non-primitives--------------------------------------------------

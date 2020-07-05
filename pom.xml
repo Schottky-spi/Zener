@@ -6,7 +6,7 @@
 
     <groupId>com.github.Schottky-spi</groupId>
     <artifactId>Zener</artifactId>
-    <version>v1.1.1</version>
+    <version>v1.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
