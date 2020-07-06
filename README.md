@@ -12,14 +12,7 @@ To install this API using Maven add the dependency
     <version>v1.1.1</version>
 </dependency>
 ```
-to your dependencies-list. You will also have to add the repository to your repositories-list:
-
-```xml
-<repository>
-    <id>github</id>
-    <url>https://maven.pkg.github.com/Schottky-spi/Zener</url>
-</repository>
-```
+to your dependencies-list.
 
 Since this library is pretty small, you probably want to shade it into your plugin using the Maven shade-plugin. You can take this template
 as a hint
