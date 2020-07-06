@@ -118,6 +118,19 @@ class RandomChanceCollectionTest {
 
     }
 
+    @Nested class A_new_element {
+
+        @ParameterizedTest
+        @ValueSource(doubles = {50, 75, 100})
+        public void increases_the_size_and_weight_sum(double weight) {
+            RandomChanceCollection<String> randomChanceCollection = new RandomChanceCollection<>();
+            boolean changed = randomChanceCollection.add(weight, "foo");
+            assertEquals(1, randomChanceCollection.size());
+            assertEquals(weight, randomChanceCollection.sumOfWeights());
+            assertTrue(changed);
+        }
+    }
+
     @Nested public class Random_elements {
 
         @ParameterizedTest

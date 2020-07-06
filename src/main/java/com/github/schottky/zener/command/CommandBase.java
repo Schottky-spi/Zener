@@ -4,6 +4,7 @@ import com.github.schottky.zener.localization.Language;
 import com.github.schottky.zener.util.ArrayUtil;
 import com.github.schottky.zener.util.CollectionUtil;
 import com.github.schottky.zener.util.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -20,17 +21,19 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     static {
         Language.addDefaults(
-                "command.permission_denied", "&6You do not have permission",
-                "command.not_executable_as_player", "&6You cannot execute this as a player",
-                "command.not_executable_as_console", "&6You cannot execute this as console",
-                "command.too_few_arguments", "&6Too few arguments! Provide at least {args}",
-                "command.too_many_arguments", "&6Too many arguments!");
+                "message.permission_denied", "&6You do not have permission",
+                "message.not_executable_as_player", "&6You cannot execute this as a player",
+                "message.not_executable_as_console", "&6You cannot execute this as console",
+                "message.too_few_arguments", "&6Too few arguments! Provide at least {args}",
+                "message.too_many_arguments", "&6Too many arguments!");
     }
 
     /**The permission a {@link org.bukkit.permissions.Permissible} must have to execute this command*/
     protected Permission permission;
     /**The minimum, resp. maximum number of arguments this command may have*/
     protected int minArgsLength, maxArgsLength;
+
+    protected Set<String> aliases;
 
     public CommandBase() {
         injectCmdAnnotation();
@@ -41,9 +44,9 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      * No class should override this method and instead override any sub-methods like
      * {@link CommandBase#onAcceptedCommand(CommandSender, Command, String, String[])}
      * @param sender The sender that executed this command
-     * @param command The command that was sent
-     * @param label The label under which this command was sent
-     * @param arguments The arguments
+     * @param command The command that was sent (referring to the root CommandBase)
+     * @param label The label under which this command was sent, referring to the SubCommand
+     * @param arguments The arguments of this command, referring to the SubCommand
      * @return whether or not this command should display it's usage-message or not
      * @see #onAcceptedCommand(CommandSender, Command, String, String[])
      * @see #onPlayerCommand(Player, Command, String, String[])
@@ -70,7 +73,13 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             sender.sendMessage(base.tooManyArgumentsMessage(newArgs.length - base.maxArgsLength));
             return true;
         }
-        return base.onAcceptedCommand(sender, command, label, newArgs);
+
+        return base.onAcceptedCommand(sender, command, labelUsed(base, arguments, label), newArgs);
+    }
+
+    private String labelUsed(@NotNull CommandBase base, String[] args, String originalLabel) {
+        int depth = base.computeDepth();
+        return depth == 0 ? originalLabel : args[depth - 1];
     }
 
     /**
@@ -164,7 +173,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             options.removeIf(name -> !name.startsWith(args[0]));
             return options;
         } else {
-            return base.onTabComplete(sender, command, label, ArrayUtil.popFirstN(args, base.computeDepth()));
+            return base.onTabComplete(sender, command, labelUsed(base, args, label), ArrayUtil.popFirstN(args, base.computeDepth()));
         }
     }
 
@@ -202,11 +211,12 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      * @return The Command that is the best match considering the arguments
      */
 
-     CommandBase findSubCommand(String[] args) {
+    CommandBase findSubCommand(String[] args) {
         if (this.subCommands.isEmpty() || args.length == 0) return this;
-        for (SubCommand subCommand: subCommands) {
-            if (subCommand.name.equalsIgnoreCase(args[0])) {
-                return subCommand.findSubCommand(ArrayUtil.popFirstN(args, 1));
+        for (SubCommand cmd : subCommands) {
+            if (cmd.name.equalsIgnoreCase(args[0]) ||
+                    cmd.aliases.contains(args[0].toLowerCase())) {
+                return cmd.findSubCommand(ArrayUtil.popFirstN(args, 1));
             }
         }
         return this;
@@ -231,9 +241,17 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
                 .orElseThrow(() -> new RuntimeException("No Annotation 'Cmd' present at Command-class" + this.getClass()));
 
         this.name = cmd.name();
+        String permission = cmd.permission().isEmpty() ?
+                Objects.requireNonNull(Bukkit.getPluginCommand(name)).getPermission() :
+                cmd.permission();
+        this.permission = new Permission(Objects.requireNonNull(permission));
         this.permission = new Permission(cmd.permission(), cmd.permDefault());
         this.minArgsLength = cmd.minArgs();
         this.maxArgsLength = cmd.maxArgs();
+        this.aliases = new HashSet<>();
+        for (String alias: cmd.aliases()) {
+            aliases.add(alias.toLowerCase());
+        }
     }
 
     /**
