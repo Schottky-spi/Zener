@@ -9,7 +9,7 @@ To install this API using Maven add the dependency
 <dependency>
     <groupId>com.github.Schottky-spi</groupId>
     <artifactId>zener</artifactId>
-    <version>v1.1.1</version>
+    <version>v1.2.1</version>
 </dependency>
 ```
 to your dependencies-list.
