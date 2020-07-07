@@ -46,7 +46,7 @@ as a hint
 
 The main feature of this library is the ability too easily localize any messages. The main entry point
 to enable this feature is the `Language`-class. In most cases, a `Language` can simply be created using
-The static factory method
+the static factory-method
 ```java
 Language language = Language.forPlugin(plugin, Locale.US, LanguageFile.StorageProvider.JSON);
 ```
@@ -110,7 +110,7 @@ ItemStorage.getInt(stack.getItemMeta(), namespacedKey).ifPresent(value -> {
 
 ### Random-chance collection
 
-This can be used to get elements with a certian weight that might represent a chance. For example:
+A collection that can be used to get elements with a certian weight that might represent a chance. For example:
 ```
 RandomChanceCollection<String> randomChanceCollection = RandomChanceCollection.of(initialElements);
 for (int i = 0; i < 4; i++) {
