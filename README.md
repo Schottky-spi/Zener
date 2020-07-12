@@ -75,7 +75,7 @@ lore.removeRange(1, 3);
 ```
 removing a pre-compiled pattern
 ```
-Pattern pattern = Pattern.quote("Sword of Asparagus");
+Pattern pattern = Pattern.compile(Pattern.quote("Sword of Asparagus"));
 lore.remove(pattern);
 lore.add("Sword of Onions");
 ```
