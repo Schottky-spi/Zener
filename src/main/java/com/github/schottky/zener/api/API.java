@@ -1,21 +1,30 @@
 package com.github.schottky.zener.api;
 
-import org.bukkit.plugin.Plugin;
+import com.github.schottky.zener.util.messaging.Console;
+import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public interface API {
 
-    void start(Plugin plugin);
+    void start(JavaPlugin plugin);
 
     void end();
 
-    Plugin providingPlugin();
+    JavaPlugin providingPlugin();
+
+    boolean isRunning();
+
+    default NamespacedKey key(String ident) {
+        return new NamespacedKey(providingPlugin(), ident);
+    }
+
 
     class Impl implements API {
 
-        private Plugin plugin;
+        private JavaPlugin plugin;
 
         @Override
-        public void start(Plugin plugin) {
+        public void start(JavaPlugin plugin) {
             this.plugin = plugin;
         }
 
@@ -25,8 +34,19 @@ public interface API {
         }
 
         @Override
-        public Plugin providingPlugin() {
-            return plugin;
+        public JavaPlugin providingPlugin() {
+            if (plugin == null) {
+                Console.severe("Plugin-dependent functionality called without providing plugin");
+                Console.severe("Fix this by calling 'API#start(JavaPlugin)' in your 'onEnable'-method");
+                throw new RuntimeException();
+            } else {
+                return plugin;
+            }
+        }
+
+        @Override
+        public boolean isRunning() {
+            return plugin != null;
         }
     }
 }
