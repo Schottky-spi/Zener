@@ -596,12 +596,21 @@ public class Language {
     }
 
     public static Language fromFile(@NotNull LanguageFile file) throws FileNotFoundException {
-        return readFrom(new FileReader(file.toIOFile()), file.locale(), file.storageProvider());
+        final FileReader reader = new FileReader(file.toIOFile());
+        final Language language = readFrom(reader, file.locale(), file.storageProvider());
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return language;
     }
 
     public void saveToFile(@NotNull File file, LanguageFile.StorageProvider storageProvider) throws IOException {
         LanguageFile languageFile = new LanguageFile(file.getParentFile(), this.locale, storageProvider);
-        writeTo(new FileWriter(languageFile.toIOFile()), storageProvider);
+        final FileWriter writer = new FileWriter(languageFile.toIOFile());
+        writeTo(writer, storageProvider);
+        writer.close();
     }
 
 }
