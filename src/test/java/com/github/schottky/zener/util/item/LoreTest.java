@@ -10,8 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LoreTest {
 
@@ -37,7 +36,7 @@ class LoreTest {
     }
 
     @Test
-    void a_lore_removes_a_valid_range() {
+    void removes_a_valid_range() {
         Lore initial = new Lore("foo", "bar", "hello", "world");
 
         Lore next = initial.duplicate();
@@ -54,8 +53,9 @@ class LoreTest {
         Lore lore = new Lore("foo", "bar");
         Lore duplicate = lore.duplicate();
         assertEquals(lore.size(), duplicate.size());
-        assertIterableEquals(lore, duplicate);
+        assertEquals(lore, duplicate);
         assertEquals(lore.resetsAtStart(), duplicate.resetsAtStart());
+        assertNotSame(lore, duplicate);
     }
 
 
@@ -70,24 +70,31 @@ class LoreTest {
     @Test
     void a_lore_does_not_append_reset_when_already_reset() {
         List<String> someList = Arrays.asList(ChatColor.RESET + "Hello", ChatColor.RESET + "World");
-        Lore lore = new Lore(someList);
+        Lore lore = new Lore(someList).thatResetsAtStart();
         assertIterableEquals(someList, lore);
     }
 
     @Nested class A_lore_adds_multiple_elements {
 
         @Test
-        void that_are_translated() {
-            Lore lore = new Lore("hello");
-            lore.addAll("world", "foo", "bar");
-            assertEquals(lore.size(), 4);
-            assertEquals(new Lore("hello", "world", "foo", "bar"), lore);
-        }
-        @Test
         void at_an_index() {
             Lore lore = new Lore("hello", "world");
             lore.addAll(1, "foo", "bar");
             assertEquals(new Lore("hello", "foo", "bar", "world"), lore);
         }
+
+        @Test
+        void with_variable_args() {
+            Lore lore = new Lore("hello", "world");
+            lore.addAll("foo", "bar");
+            assertEquals(new Lore("hello", "world", "foo", "bar"), lore);
+        }
+    }
+
+    @Test
+    public void can_be_converted_to_an_array() {
+        Lore lore = new Lore("Hello", "World").thatDoesNotResetAtStart();
+        assertArrayEquals(new String[] {"Hello", "World"}, lore.toArray());
+        assertArrayEquals(new String[] {"Hello", "World"}, lore.toArray(new String[0]));
     }
 }

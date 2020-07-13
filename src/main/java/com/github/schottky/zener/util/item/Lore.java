@@ -55,11 +55,15 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     /**
      * returns this lore where no element will start with a 'reset'-special string.
      * Every subsequent add or set-command will append the equivalent {@link ChatColor#RESET}-string
+     * <br> A typical application could be
+     * <pre>{@code
+     * Lore lore = new Lore("foo", "bar").thatDoesNotResetAtStart();
+     * }</pre>
      * @return This lore
      */
 
     public Lore thatDoesNotResetAtStart() {
-        if (size() > 0 && this.resetAtStart)
+        if (this.resetAtStart)
             contents.replaceAll(s -> s.startsWith(reset) ? s.substring(reset.length()) : s);
         this.resetAtStart = false;
         return this;
@@ -72,7 +76,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
      */
 
     public Lore thatResetsAtStart() {
-        if (size() > 0 && !this.resetAtStart)
+        if (!this.resetAtStart)
             contents.replaceAll(s -> s.startsWith(reset) ? s : reset + s);
         this.resetAtStart = true;
         return this;
@@ -86,18 +90,34 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         this(Arrays.asList(lore));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
     @Override
     public String get(int index) { return contents.get(index); }
+
+    /**
+     * {@inheritDoc}
+     */
 
     @Override
     public void removeRange(int fromIndex, int toIndex) {
         super.removeRange(fromIndex, toIndex);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
     @Override
     public boolean remove(Object o) {
         return contents.remove(o);
     }
+
+    /**
+     * {@inheritDoc}
+     */
 
     @Override
     public String remove(int index) {
@@ -120,6 +140,10 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     public void remove(Pattern pattern) {
         contents.removeIf(s -> pattern.matcher(s).find());
     }
+
+    /**
+     * {@inheritDoc}
+     */
 
     @Override
     public String set(int index, String element) {
@@ -144,6 +168,10 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         this.addAll(index, Arrays.asList(elements));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
     @NotNull
     @Override
     public String[] toArray() {
@@ -154,11 +182,19 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         return arr;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
     @NotNull
     @Override
     public <T> T[] toArray(@NotNull T[] a) {
         return super.toArray(a);
     }
+
+    /**
+     * {@inheritDoc}
+     */
 
     @Override
     public void add(int index, String element) {
@@ -188,6 +224,10 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         applyTo(meta);
         stack.setItemMeta(meta);
     }
+
+    /**
+     * {@inheritDoc}
+     */
 
     @Override
     public int size() {
