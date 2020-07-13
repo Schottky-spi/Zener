@@ -19,24 +19,37 @@ as a hint
 
 ```xml
 <plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-shade-plugin</artifactId>
-<version>3.2.1</version>
-<executions>
-    <execution>
-        <phase>package</phase>
-        <goals>
-            <goal>shade</goal>
-        </goals>
-        <configuration>
-            <artifactSet>
-                <excludes>
-                    <exclude>org.jetbrains:annotations:jar:*</exclude> <!-- not necesairily applicable for any project, serves as an example -->
-                </excludes>
-            </artifactSet>
-        </configuration>
-    </execution>
-</executions>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <version>3.2.1</version>
+    <executions>
+        <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <!-- Use this to rename the package 'com.github.schottky.zener' to 'com.github.schottky.zener.<your artifact-id>'.
+                     This avoids naming-conflicts and enables multiple plugins to use the same library. You can use any name you want
+                     as the shadedPattern
+                -->
+                <relocations>
+                    <relocation>
+                        <pattern>com.github.schottky.zener</pattern>
+                        <shadedPattern>com.github.schottky.zener.${project.artifactId}</shadedPattern>
+                    </relocation>
+                </relocations>
+                <!-- exclude any artifacts that you might not want in the shaded jar. A good example for this
+                     are intelliJ's annotations (@Nullable, @NotNull, e.t.c.)
+                <artifactSet>
+                    <excludes>
+                        <exclude>org.jetbrains:annotations:jar:*</exclude>
+                    </excludes>
+                </artifactSet>
+                -->
+            </configuration>
+        </execution>
+    </executions>
 </plugin>
 ```
 
