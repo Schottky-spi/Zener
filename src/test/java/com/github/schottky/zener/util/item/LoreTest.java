@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,6 +91,13 @@ class LoreTest {
         Pattern pattern = Pattern.compile(Pattern.quote("Sword of asparagus"));
         lore.remove(pattern);
         assertEquals(Lore.newLoreWithRawElements("Sword of Cucumber"), lore);
+    }
+
+    @Test
+    void a_lore_does_not_append_reset_when_already_reset() {
+        List<String> someList = Arrays.asList(ChatColor.RESET + "Hello", ChatColor.RESET + "World");
+        Lore lore = Lore.newLoreWithRawElements(someList);
+        assertIterableEquals(someList, lore);
     }
 
     @Nested class A_lore_adds_multiple_elements {

@@ -250,7 +250,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
      */
 
     public boolean addRaw(String s) {
-        if (resetAtStart) return contents.add(reset + s);
+        if (resetAtStart && !s.startsWith(reset)) return contents.add(reset + s);
         else return contents.add(s);
     }
 
