@@ -50,7 +50,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     @Contract("_ -> new")
     public static @NotNull Lore of(@Nullable ItemMeta meta) {
         if (meta == null || meta.getLore() == null) return new Lore();
-        else return new Lore(meta.getLore());
+        else return Lore.newLoreWithRawElements(meta.getLore());
     }
 
     /**
@@ -197,10 +197,28 @@ public class Lore extends AbstractList<String> implements Collection<String> {
      * @param elements The elements to add
      */
 
-    public void addAllRaw(int index, String @NotNull... elements) {
-        for (String content: elements) {
-            this.add(index++, content);
+    public void addAllRaw(int index, String @NotNull ... elements) {
+        for (String content : elements) this.add(index++, content);
+    }
+
+    public void addAllRaw(int index, @NotNull Iterable<String> elements) {
+        for (String content : elements) this.addRaw(index++, content);
+    }
+
+    @NotNull
+    @Override
+    public String[] toArray() {
+        String[] arr = new String[contents.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = contents.get(i);
         }
+        return arr;
+    }
+
+    @NotNull
+    @Override
+    public <T> T[] toArray(@NotNull T[] a) {
+        return super.toArray(a);
     }
 
     @Override

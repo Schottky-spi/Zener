@@ -122,5 +122,12 @@ class LoreTest {
             lore.addAllRaw(1, "foo", "bar");
             assertEquals(Lore.newLoreWithRawElements("hello", "foo", "bar", "world"), lore);
         }
+
+        @Test
+        void using_an_iterable_at_an_index_raw() {
+            Lore lore = Lore.newLoreWithRawElements("hello", "world");
+            lore.addAllRaw(1, Arrays.asList("foo", "bar"));
+            assertEquals(Lore.newLoreWithRawElements("hello", "foo", "bar", "world"), lore);
+        }
     }
 }
