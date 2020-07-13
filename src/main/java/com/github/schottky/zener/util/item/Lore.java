@@ -1,6 +1,5 @@
 package com.github.schottky.zener.util.item;
 
-import com.github.schottky.zener.localization.Language;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,31 +49,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     @Contract("_ -> new")
     public static @NotNull Lore of(@Nullable ItemMeta meta) {
         if (meta == null || meta.getLore() == null) return new Lore();
-        else return Lore.newLoreWithRawElements(meta.getLore());
-    }
-
-    /**
-     * returns a new lore that contains the given raw (unlocalized) elements
-     * @param rawElements The raw elements to add
-     * @return The newly created lore containing the given elements
-     */
-
-    public static @NotNull Lore newLoreWithRawElements(String @NotNull ... rawElements) {
-        Lore lore = new Lore();
-        for (String element: rawElements) lore.addRaw(element);
-        return lore;
-    }
-
-    /**
-     * returns a new lore that contains the given raw (unlocalized) elements
-     * @param rawElements The raw elements to add
-     * @return The newly created lore containing the given elements
-     */
-
-    public static @NotNull Lore newLoreWithRawElements(@NotNull Iterable<String> rawElements) {
-        Lore lore = new Lore();
-        rawElements.forEach(lore::addRaw);
-        return lore;
+        else return new Lore(meta.getLore());
     }
 
     /**
@@ -85,7 +60,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
 
     public Lore thatDoesNotResetAtStart() {
         if (size() > 0 && this.resetAtStart)
-            contents.replaceAll(s -> s.substring(reset.length()));
+            contents.replaceAll(s -> s.startsWith(reset) ? s.substring(reset.length()) : s);
         this.resetAtStart = false;
         return this;
     }
@@ -98,7 +73,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
 
     public Lore thatResetsAtStart() {
         if (size() > 0 && !this.resetAtStart)
-            contents.replaceAll(s -> reset + s);
+            contents.replaceAll(s -> s.startsWith(reset) ? s : reset + s);
         this.resetAtStart = true;
         return this;
     }
@@ -129,23 +104,6 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         return contents.remove(index);
     }
 
-    @Override
-    public String set(int index, String translationKey) {
-        return setRaw(index, Language.current().translate(translationKey));
-    }
-
-    /**
-     * sets the contents of the lore at the specified index to a certain value.
-     * This value will not be translated
-     * @param index The index to set the element to
-     * @param element The element to set
-     * @return The element previously at the specified position
-     */
-
-    public String setRaw(int index, String element) {
-        return contents.set(index, resetAtStart ? reset + element : element);
-    }
-
     /**
      * removes a certain (possibly pre-compiled) pattern from this lore. For example, removing the pattern
      * <pre>{@code
@@ -163,6 +121,11 @@ public class Lore extends AbstractList<String> implements Collection<String> {
         contents.removeIf(s -> pattern.matcher(s).find());
     }
 
+    @Override
+    public String set(int index, String element) {
+        return contents.set(index, resetAtStart && !element.startsWith(reset) ? reset + element : element);
+    }
+
     /**
      * adds all of the specified elements to this collection
      * @param elements The elements to add
@@ -173,36 +136,12 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     }
 
     /**
-     * adds all of the specified elements raw to this collection (without translating them first)
-     * @param elements The elements to add
-     */
-
-    public void addAllRaw(String @NotNull... elements) {
-        for (String content: elements) {
-            this.addRaw(content);
-        }
-    }
-
-    /**
      * adds all of the specified elements to this collection at a certain index
      * @param elements The elements to add
      */
 
     public void addAll(int index, String @NotNull ... elements) {
         this.addAll(index, Arrays.asList(elements));
-    }
-
-    /**
-     * adds all of the specified elements raw to this collection (without translating them first) at a certain index
-     * @param elements The elements to add
-     */
-
-    public void addAllRaw(int index, String @NotNull ... elements) {
-        for (String content : elements) this.add(index++, content);
-    }
-
-    public void addAllRaw(int index, @NotNull Iterable<String> elements) {
-        for (String content : elements) this.addRaw(index++, content);
     }
 
     @NotNull
@@ -223,35 +162,7 @@ public class Lore extends AbstractList<String> implements Collection<String> {
 
     @Override
     public void add(int index, String element) {
-        addRaw(index, Language.current().translate(element));
-    }
-
-    /**
-     * Adds a certain element to this list at a certain position
-     * @param index The index to add the element to
-     * @param element The element to add
-     * @see List#add(Object)
-     */
-
-    public void addRaw(int index, String element) {
-        if (resetAtStart) contents.add(index, reset + element);
-        else contents.add(index, element);
-    }
-
-    @Override
-    public boolean add(String s) {
-        return addRaw(Language.current().translate(s));
-    }
-
-    /**
-     * Adds a certain element to the head of this list
-     * @param s The element to add
-     * @see List#add(Object)
-     */
-
-    public boolean addRaw(String s) {
-        if (resetAtStart && !s.startsWith(reset)) return contents.add(reset + s);
-        else return contents.add(s);
+        contents.add(index, resetAtStart && !element.startsWith(reset) ? reset + element : element);
     }
 
     /**
