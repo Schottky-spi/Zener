@@ -12,6 +12,8 @@ import java.util.Map;
 public class PropertiesFile {
 
     private final Map<String,String> properties = new LinkedHashMap<>();
+    public static final char SEPARATOR_CHAR = ':';
+    public static final char COMMENT_CHAR = '#';
 
     public String getProperty(String property) {
         return properties.get(property);
@@ -27,10 +29,12 @@ public class PropertiesFile {
         int currentLineInd = 1;
         try {
             while ((currentLine = bufferedReader.readLine()) != null) {
-                int colonInd = currentLine.indexOf(':');
+                // ignore comments
+                if (currentLine.startsWith(String.valueOf(COMMENT_CHAR))) continue;
+                int colonInd = currentLine.indexOf(SEPARATOR_CHAR);
                 if (colonInd < 0) {
-                    Console.warning("Invalid properties-file (at line " + currentLineInd + "), " +
-                            "does not contain a colon (':')");
+                    Console.warning(String.format("Invalid properties-file (at line %d), " +
+                            "does not contain a separator ('%s')", currentLineInd, SEPARATOR_CHAR));
                 } else {
                     addProperty(currentLine.substring(0, colonInd), currentLine.substring(colonInd + 1));
                 }

@@ -24,4 +24,17 @@ class PropertiesFileTest {
             assertEquals(expected, properties.rawMap());
         }
     }
+
+    @Test
+    public void property_file_ignore_comments() {
+        Reader reader = new StringReader(
+                "property1:My awesome property\n" +
+                        "#This is a comment\n" +
+                        "property2:Another property");
+        PropertiesFile properties = PropertiesFile.loadProperties(reader);
+        Map<String,String> expected = new LinkedHashMap<>();
+        expected.put("property1", "My awesome property");
+        expected.put("property2", "Another property");
+        assertEquals(expected, properties.rawMap());
+    }
 }
