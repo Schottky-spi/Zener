@@ -3,7 +3,9 @@ package com.github.schottky.zener.api;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ZenerAPI {
+public final class ZenerAPI {
+
+    private ZenerAPI() {}
 
     private static final API api = new API.Impl();
 
