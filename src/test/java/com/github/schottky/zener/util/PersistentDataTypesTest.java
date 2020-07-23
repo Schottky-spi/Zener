@@ -1,5 +1,6 @@
 package com.github.schottky.zener.util;
 
+import com.github.schottky.zener.test.CSVToArray;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -7,13 +8,20 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class PersistentDataTypesTest {
 
@@ -22,7 +30,7 @@ class PersistentDataTypesTest {
     @Nested
     class The_UUID_Data_Type {
 
-        @Test
+        @RepeatedTest(1000)
         void stores_and_restores_a_random_uuid() {
             UUID uuid = UUID.randomUUID();
             byte[] primitiveValue = PersistentDataTypes.UUID.toPrimitive(uuid, mockContext);
@@ -57,6 +65,26 @@ class PersistentDataTypesTest {
         }
     }
 
+    @Nested class The_String_list_data_type {
+
+        @ParameterizedTest
+        @CsvSource({"Hello, World, foo, bar", "Hello"})
+        void stores_and_restores_a_string_list(@ConvertWith(CSVToArray.class)String... input) {
+            List<String> strings = Arrays.asList(input);
+            byte[] primitive = PersistentDataTypes.STRING_LIST.toPrimitive(new PersistentDataTypes.StringList(strings), mockContext);
+            PersistentDataTypes.StringList restored = PersistentDataTypes.STRING_LIST.fromPrimitive(primitive, mockContext);
+            assertIterableEquals(strings, restored);
+        }
+
+        @Test
+        void stores_an_empty_string() {
+            List<String> strings = Collections.emptyList();
+            byte[] primitive = PersistentDataTypes.STRING_LIST.toPrimitive(new PersistentDataTypes.StringList(strings), mockContext);
+            PersistentDataTypes.StringList restored = PersistentDataTypes.STRING_LIST.fromPrimitive(primitive, mockContext);
+            assertIterableEquals(strings, restored);
+        }
+    }
+
     static class MockPersistentDataAdapterContext implements PersistentDataAdapterContext {
 
         @Override
@@ -67,28 +95,13 @@ class PersistentDataTypesTest {
 
     static class MockPersistentDataContainer implements PersistentDataContainer {
 
-        @Override
         public <T, Z> void set(@NotNull NamespacedKey namespacedKey, @NotNull PersistentDataType<T, Z> persistentDataType, @NotNull Z z) { }
-
-        @Override
         public <T, Z> boolean has(@NotNull NamespacedKey namespacedKey, @NotNull PersistentDataType<T, Z> persistentDataType) { return false; }
-
-        @Override
         public <T, Z> @Nullable Z get(@NotNull NamespacedKey namespacedKey, @NotNull PersistentDataType<T, Z> persistentDataType) { return null; }
-
-        @Override
         public <T, Z> @NotNull Z getOrDefault(@NotNull NamespacedKey namespacedKey, @NotNull PersistentDataType<T, Z> persistentDataType, @NotNull Z z) { return z; }
-
-        @Override
         public void remove(@NotNull NamespacedKey namespacedKey) { }
-
-        @Override
         public boolean isEmpty() { return true; }
-
-        @Override
-        public @NotNull PersistentDataAdapterContext getAdapterContext() {
-            return new MockPersistentDataAdapterContext();
-        }
+        public @NotNull PersistentDataAdapterContext getAdapterContext() { return new MockPersistentDataAdapterContext(); }
     }
 
 }
