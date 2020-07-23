@@ -4,7 +4,11 @@ import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class PersistentDataTypes {
@@ -76,4 +80,49 @@ public final class PersistentDataTypes {
             return aByte != 0;
         }
     };
+
+    public static class StringList extends AbstractList<String> {
+
+        private final List<String> l;
+        StringList(List<String> l)            {this.l = l;}
+
+        public String get(int index)          {return l.get(index);}
+        public int size()                     {return l.size();}
+        public List<String> modifiableList()  {return new ArrayList<>(l);}
+    }
+
+    public static final PersistentDataType<byte[], StringList> STRING_LIST = new PersistentDataType<byte[], StringList>() {
+
+        public @NotNull Class<byte[]> getPrimitiveType()    {return byte[].class;}
+        public @NotNull Class<StringList> getComplexType()  {return StringList.class;}
+
+        @Override
+        public byte @NotNull [] toPrimitive(@NotNull StringList strings, @NotNull PersistentDataAdapterContext persistentDataAdapterContext) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (String s: strings) {
+                for (char c: s.toCharArray()) {
+                    outputStream.write(c);
+                }
+                outputStream.write(0);
+            }
+            return outputStream.toByteArray();
+        }
+
+        @NotNull
+        @Override
+        public StringList fromPrimitive(byte @NotNull [] bytes, @NotNull PersistentDataAdapterContext persistentDataAdapterContext) {
+            StringBuilder builder = new StringBuilder();
+            final List<String> strings = new ArrayList<>();
+            for (byte b: bytes) {
+                if (b == 0) {
+                    strings.add(builder.toString());
+                    builder = new StringBuilder();
+                } else {
+                    builder.append((char) b);
+                }
+            }
+            return new StringList(strings);
+        }
+    };
+
 }
