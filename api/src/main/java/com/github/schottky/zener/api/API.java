@@ -1,8 +1,7 @@
 package com.github.schottky.zener.api;
 
-import com.github.schottky.zener.menu.event.MenuListeners;
-import com.github.schottky.zener.util.messaging.Console;
-import org.bukkit.Bukkit;
+
+import com.github.schottky.zener.messaging.Console;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,7 +25,6 @@ public interface API {
         @Override
         public void start(JavaPlugin plugin) {
             this.plugin = plugin;
-            Bukkit.getPluginManager().registerEvents(new MenuListeners(), plugin);
         }
 
         @Override
@@ -36,13 +34,8 @@ public interface API {
 
         @Override
         public JavaPlugin providingPlugin() {
-            if (plugin == null) {
-                Console.severe("Plugin-dependent functionality called without providing plugin");
-                Console.severe("Fix this by calling 'API#start(JavaPlugin)' in your 'onEnable'-method");
-                throw new RuntimeException();
-            } else {
-                return plugin;
-            }
+            checkPluginDependentFunctionality();
+            return plugin;
         }
 
         public void checkPluginDependentFunctionality() {

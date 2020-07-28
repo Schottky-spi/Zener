@@ -1,7 +1,7 @@
 package com.github.schottky.zener.command;
 
 import com.github.schottky.zener.api.ZenerAPI;
-import com.github.schottky.zener.util.messaging.Console;
+import com.github.schottky.zener.messaging.Console;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;

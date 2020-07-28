@@ -1,6 +1,6 @@
 package com.github.schottky.zener.util;
 
-import com.github.schottky.zener.util.messaging.Console;
+import com.github.schottky.zener.messaging.Console;
 import com.google.common.base.Joiner;
 import org.jetbrains.annotations.NotNull;
 

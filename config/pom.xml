@@ -4,20 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>config</artifactId>
-    <version>v1.2.4-SNAPSHOT</version>
+    <artifactId>zener-config</artifactId>
+    <version>v0.1-UNSTABLE</version>
 
     <parent>
-        <artifactId>Zener</artifactId>
+        <artifactId>zener</artifactId>
         <groupId>com.github.Schottky-spi</groupId>
-        <version>v1.2.4-SNAPSHOT</version>
+        <version>v1.3</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
-            <artifactId>Zener-api</artifactId>
-            <version>v1.2.4-SNAPSHOT</version>
+            <artifactId>zener-api</artifactId>
+            <version>v1.0</version>
         </dependency>
     </dependencies>
 

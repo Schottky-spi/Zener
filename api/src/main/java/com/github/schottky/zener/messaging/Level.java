@@ -1,4 +1,4 @@
-package com.github.schottky.zener.util.messaging;
+package com.github.schottky.zener.messaging;
 
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;

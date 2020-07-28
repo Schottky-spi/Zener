@@ -1,6 +1,5 @@
 package com.github.schottky.zener.api;
 
-import com.github.schottky.zener.command.CommandBase;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,8 +27,8 @@ public final class ZenerAPI {
     /**
      * Start all relevant tasks that are related to a plugin.
      * If this method is not called, functionality such as
-     * {@link com.github.schottky.zener.command.Commands#registerAll(CommandBase...)}
-     * or {@link #key(String)} as well as all methods of {@link com.github.schottky.zener.util.item.ItemStorage}
+     * registering commands (in the zener-command module) or setting
+     * an item-storage (in the zener-util module)
      * will not work and throw a {@code NullPointerException}
      * @param plugin The plugin that this API should use
      */

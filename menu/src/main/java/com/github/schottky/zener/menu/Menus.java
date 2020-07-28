@@ -15,9 +15,9 @@ public final class Menus {
     @Contract("_, _, _ -> new")
     public static @NotNull Menu newConfirmationDialog(
             @NotNull String title,
-            @NotNull MenuItem onAccept,
-            @NotNull MenuItem onDeny) {
-        return new ConfirmationDialog(title, onAccept, onDeny);
+            @NotNull MenuItem accept,
+            @NotNull MenuItem deny) {
+        return new ConfirmationDialog(title, accept, deny);
     }
 
     private static class ConfirmationDialog extends AbstractMenu {

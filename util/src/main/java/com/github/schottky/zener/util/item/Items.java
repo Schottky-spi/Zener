@@ -1,6 +1,5 @@
 package com.github.schottky.zener.util.item;
 
-import com.github.schottky.zener.localization.Language;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,9 +18,5 @@ public class Items {
         meta.setDisplayName(title);
         stack.setItemMeta(meta);
         return stack;
-    }
-
-    public static @NotNull ItemStack withTranslatedTitle(Material material, String translationKey) {
-        return withTitle(material, Language.current().translate(translationKey));
     }
 }

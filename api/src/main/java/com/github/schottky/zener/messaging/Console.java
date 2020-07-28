@@ -1,4 +1,4 @@
-package com.github.schottky.zener.util.messaging;
+package com.github.schottky.zener.messaging;
 
 import com.github.schottky.zener.api.ZenerAPI;
 import org.bukkit.Bukkit;
