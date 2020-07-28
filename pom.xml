@@ -6,7 +6,7 @@
 
     <groupId>com.github.Schottky-spi</groupId>
     <artifactId>Zener</artifactId>
-    <version>v1.2.4-SNAPSHOT</version>
+    <version>v1.3-SNAPSHOT</version>
 
     <modules>
         <module>language</module>
