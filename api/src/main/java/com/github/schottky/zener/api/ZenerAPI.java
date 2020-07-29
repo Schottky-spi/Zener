@@ -1,76 +1,63 @@
 package com.github.schottky.zener.api;
 
+
+import com.github.schottky.zener.messaging.Console;
+import org.apiguardian.api.API;
+import org.apiguardian.api.API.Status;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Main entry-point for version and plugin-dependant functionality
- * and wrapper for the {@link API}.
- * Typically, in the on-enable method of the main-plugin,
- * the {@link #start(JavaPlugin)}-method should be called
- * and in the on-disable method of the main-plugin,
- * the {@link #end()}-method should be called
- */
+public interface ZenerAPI {
 
-public final class ZenerAPI {
+    void start(@NotNull JavaPlugin plugin);
 
-    private ZenerAPI() {}
+    void end();
 
-    private static final API api = new API.Impl();
+    JavaPlugin providingPlugin();
 
-    /**
-     * Returns the API-Object for this version
-     * @return The API
-     */
-    public static API api() { return api; }
+    boolean isRunning();
 
-    /**
-     * Start all relevant tasks that are related to a plugin.
-     * If this method is not called, functionality such as
-     * registering commands (in the zener-command module) or setting
-     * an item-storage (in the zener-util module)
-     * will not work and throw a {@code NullPointerException}
-     * @param plugin The plugin that this API should use
-     */
+    NamespacedKey key(String ident);
 
-    public static void start(JavaPlugin plugin) { api.start(plugin); }
+    @API(status = Status.INTERNAL)
+    class Impl implements ZenerAPI {
 
-    /**
-     * The endpoint in the lifecycle of the API. After a call of this,
-     * All plugin-dependent functions will no longer work.
-     * <br>This should be called inside {@link JavaPlugin#onDisable()}
-     * to safely disable this plugin and enable any clean-up work.
-     * Currently, it is not necessary to call this method, however this
-     * could be the case in the future
-     */
+        private JavaPlugin plugin;
 
-    public static void end() { api.end(); }
+        @Override
+        public void start(@NotNull JavaPlugin plugin) {
+            this.plugin = plugin;
+        }
 
-    /**
-     * Returns the plugin that this API is currently working for
-     * @return The plugin
-     */
+        @Override
+        public void end() {
+            this.plugin = null;
+        }
 
-    public static JavaPlugin providingPlugin() { return api.providingPlugin(); }
+        @Override
+        public JavaPlugin providingPlugin() {
+            checkPluginDependentFunctionality();
+            return plugin;
+        }
 
-    /**
-     * return if the API is enabled. This is {@code true}, if
-     * {@link #start(JavaPlugin)} has been called and is {@code false}
-     * per default or when the {@link #end()} method has been called
-     * @return If the API is running or not
-     */
+        public void checkPluginDependentFunctionality() {
+            if (plugin == null) {
+                Console.severe("Plugin-dependent functionality called without providing plugin");
+                Console.severe("Fix this by calling 'API#start(JavaPlugin)' in your 'onEnable'-method");
+                throw new RuntimeException();
+            }
+        }
 
-    public static boolean isEnabled() { return api.isRunning(); }
+        @Override
+        public boolean isRunning() {
+            return plugin != null;
+        }
 
-    /**
-     * returns the {@code NameSpacedKey} for a given {@code String} and
-     * can be used as a short-hand expression for
-     * <pre>{@code
-     * NamespacedKey key = new NamespacedKey(JavaPlugin.getInstance("somePlugin"), "identifier");
-     * }</pre>
-     * @param ident the identifier that this namespaced-key has
-     * @return The NamespacedKey
-     */
-
-    public static NamespacedKey key(String ident) { return api.key(ident); }
+        @Override
+        public NamespacedKey key(String ident) {
+            checkPluginDependentFunctionality();
+            return new NamespacedKey(plugin, ident);
+        }
+    }
 }

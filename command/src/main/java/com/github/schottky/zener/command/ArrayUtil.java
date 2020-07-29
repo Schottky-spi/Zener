@@ -1,5 +1,9 @@
-package com.github.schottky.zener.util;
+package com.github.schottky.zener.command;
 
+import org.apiguardian.api.API;
+import org.apiguardian.api.API.Status;
+
+@API(status = Status.INTERNAL)
 public final class ArrayUtil {
 
     private ArrayUtil() {}

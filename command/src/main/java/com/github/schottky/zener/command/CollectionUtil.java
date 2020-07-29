@@ -1,12 +1,14 @@
-package com.github.schottky.zener.util;
+package com.github.schottky.zener.command;
 
+import org.apiguardian.api.API;
+import org.apiguardian.api.API.Status;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
+@API(status = Status.INTERNAL)
 public final class CollectionUtil {
 
     private CollectionUtil() {}
@@ -27,9 +29,5 @@ public final class CollectionUtil {
         for (V v: iterable) out.add(mapper.apply(v));
         return out;
     }
-    
-    public static <T> Optional<T> lastOf(@NotNull List<T> list) {
-        if (list.size() == 0) return Optional.empty();
-        return Optional.of(list.get(list.size() - 1));
-    }
+
 }

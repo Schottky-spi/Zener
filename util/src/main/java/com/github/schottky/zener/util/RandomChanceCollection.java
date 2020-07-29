@@ -1,5 +1,6 @@
 package com.github.schottky.zener.util;
 
+import com.github.schottky.zener.api.Tuple;
 import com.google.common.base.Preconditions;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.Contract;

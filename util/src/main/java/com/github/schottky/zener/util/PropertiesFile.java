@@ -33,8 +33,8 @@ public class PropertiesFile {
                 if (currentLine.startsWith(String.valueOf(COMMENT_CHAR))) continue;
                 int colonInd = currentLine.indexOf(SEPARATOR_CHAR);
                 if (colonInd < 0) {
-                    Console.warning(String.format("Invalid properties-file (at line %d), " +
-                            "does not contain a separator ('%s')", currentLineInd, SEPARATOR_CHAR));
+                    Console.warning("Invalid properties-file (at line %d), " +
+                            "does not contain a separator ('%s')", currentLineInd, SEPARATOR_CHAR);
                 } else {
                     addProperty(currentLine.substring(0, colonInd), currentLine.substring(colonInd + 1));
                 }

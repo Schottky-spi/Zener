@@ -15,21 +15,13 @@ public enum Level {
     private final String prefix;
 
     public @NotNull String prefix() {
-        return asBuilder().toString();
+        return prefix;
     }
-
-    public @NotNull StringBuilder asBuilder() {
-        StringBuilder builder = new StringBuilder("[");
-        if (color != null) builder.append(color);
-        builder.append(prefix).append(ChatColor.RESET).append(']');
-        return builder;
-    }
-
-    @Nullable
-    final ChatColor color;
 
     Level(String prefix, @Nullable ChatColor color) {
-        this.prefix = prefix;
-        this.color = color;
+        final StringBuilder builder = new StringBuilder("[");
+        if (color != null) builder.append(color);
+        builder.append(prefix).append(ChatColor.RESET).append(']');
+        this.prefix = builder.toString();
     }
 }

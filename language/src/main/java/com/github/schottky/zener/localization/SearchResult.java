@@ -1,11 +1,12 @@
 package com.github.schottky.zener.localization;
 
+import org.apiguardian.api.API;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-// Internal class to represent a result to a certain search
+@API(status = API.Status.INTERNAL)
 class SearchResult<T> {
 
     @NotNull

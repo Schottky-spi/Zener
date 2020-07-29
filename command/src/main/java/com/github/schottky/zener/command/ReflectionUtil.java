@@ -1,8 +1,11 @@
-package com.github.schottky.zener.util;
+package com.github.schottky.zener.command;
+
+import org.apiguardian.api.API;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
+@API(status = API.Status.INTERNAL)
 public final class ReflectionUtil {
 
     private ReflectionUtil() {}

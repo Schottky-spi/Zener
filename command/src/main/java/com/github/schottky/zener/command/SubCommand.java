@@ -1,5 +1,8 @@
 package com.github.schottky.zener.command;
 
+import org.apiguardian.api.API;
+
+@API(status = API.Status.EXPERIMENTAL)
 public abstract class SubCommand extends CommandBase {
 
     protected final CommandBase parentCommand;

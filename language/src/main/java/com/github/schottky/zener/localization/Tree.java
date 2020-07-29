@@ -3,6 +3,7 @@ package com.github.schottky.zener.localization;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import org.apiguardian.api.API;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +12,7 @@ import java.util.function.Function;
 
 // Internal class for Language.class
 // A tree with Strings as leaves and nodes
+@API(status = API.Status.INTERNAL)
 class Tree<V,E> {
 
     private final Node<V,E> root = Node.newBranchingNode();

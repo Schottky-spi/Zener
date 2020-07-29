@@ -25,6 +25,7 @@ public interface PagedMenu extends Menu {
      * is not a valid page (it is too small or too large)
      * this will return false, but does not throw.
      * <br>Triggers an update of the underlying inventory
+     * @param page the page to navigate to
      * @return true, if navigated to the page, false otherwise
      */
 

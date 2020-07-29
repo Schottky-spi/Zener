@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
-            <artifactId>zener-util</artifactId>
+            <artifactId>zener-api</artifactId>
             <version>v1.0</version>
         </dependency>
     </dependencies>

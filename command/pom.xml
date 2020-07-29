@@ -16,12 +16,12 @@
     <dependencies>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
-            <artifactId>zener-language</artifactId>
+            <artifactId>zener-api</artifactId>
             <version>v1.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
-            <artifactId>zener-api</artifactId>
+            <artifactId>zener-language</artifactId>
             <version>v1.0</version>
         </dependency>
     </dependencies>

@@ -1,6 +1,6 @@
 package com.github.schottky.zener.util.item;
 
-import com.github.schottky.zener.api.ZenerAPI;
+import com.github.schottky.zener.api.Zener;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
@@ -163,19 +163,19 @@ public final class ItemStorage {
 
     public static <T,Z> @Nullable Z get(@Nullable ItemMeta meta, PersistentDataType<T,Z> type, String ident) {
         return meta == null ?
-                null : meta.getPersistentDataContainer().get(ZenerAPI.key(ident), type);
+                null : meta.getPersistentDataContainer().get(Zener.key(ident), type);
     }
 
     public static <T,Z> void set(@Nullable ItemMeta meta, PersistentDataType<T,Z> type, String ident, Z value) {
-        if (meta != null) meta.getPersistentDataContainer().set(ZenerAPI.key(ident), type, value);
+        if (meta != null) meta.getPersistentDataContainer().set(Zener.key(ident), type, value);
     }
 
     public static <T,Z> boolean has(@Nullable ItemMeta meta, PersistentDataType<T,Z> type, String ident) {
-        return meta != null && meta.getPersistentDataContainer().has(ZenerAPI.key(ident), type);
+        return meta != null && meta.getPersistentDataContainer().has(Zener.key(ident), type);
     }
 
     public static void remove(@Nullable ItemMeta meta, String ident) {
-        if (meta != null) meta.getPersistentDataContainer().remove(ZenerAPI.key(ident));
+        if (meta != null) meta.getPersistentDataContainer().remove(Zener.key(ident));
     }
 
 }

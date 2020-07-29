@@ -1,9 +1,8 @@
 package com.github.schottky.zener.command;
 
 import com.github.schottky.zener.localization.Language;
-import com.github.schottky.zener.util.ArrayUtil;
-import com.github.schottky.zener.util.CollectionUtil;
-import com.github.schottky.zener.util.ReflectionUtil;
+import org.apiguardian.api.API;
+import org.apiguardian.api.API.Status;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -17,6 +16,7 @@ import java.util.*;
  * The abstract base-class that all commands must extend
  */
 
+@API(status = Status.EXPERIMENTAL)
 public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     static {

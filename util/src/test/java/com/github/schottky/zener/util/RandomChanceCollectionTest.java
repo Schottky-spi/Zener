@@ -1,5 +1,6 @@
 package com.github.schottky.zener.util;
 
+import com.github.schottky.zener.api.Tuple;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -136,7 +137,7 @@ class RandomChanceCollectionTest {
         @ParameterizedTest
         @ValueSource(ints = 2000)
         public void are_approximately_randomly_distributed(int repetitions) {
-            Map<String,Double> rate = Tuple.toMap(testValues, new HashMap<>(), tuple -> Tuple.of(tuple.second(), 0.0));
+            Map<String,Double> rate = Tuple.appendToMap(testValues, new HashMap<>(), tuple -> Tuple.of(tuple.second(), 0.0));
 
             RandomChanceCollection<String> randomChanceCollection = new RandomChanceCollection<>(testValues);
             for (int i = 0; i < repetitions; i++) {
@@ -144,7 +145,7 @@ class RandomChanceCollectionTest {
                 rate.computeIfPresent(randomElement, (ignored, d) -> d + 1);
             }
             rate.replaceAll((ignored, d) -> d / (double) repetitions);
-            Map<String,Double> expected = Tuple.toMap(testValues, new HashMap<>(), Tuple::permuted);
+            Map<String,Double> expected = Tuple.appendToMap(testValues, new HashMap<>(), Tuple::permuted);
             double sum = expected.values().stream().mapToDouble(d -> d).sum();
             expected.replaceAll((ignored, d) -> d / sum);
 

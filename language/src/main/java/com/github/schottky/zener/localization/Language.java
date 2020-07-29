@@ -1,6 +1,6 @@
 package com.github.schottky.zener.localization;
 
-import com.github.schottky.zener.util.Tuple;
+import com.github.schottky.zener.api.Tuple;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.gson.GsonBuilder;
@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang.Validate;
+import org.apiguardian.api.API;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
  * see {@link #isValidIdentifier(String)}
  */
 
+@API(status = API.Status.STABLE)
 public class Language {
 
     // --------------------------------------------------- Defaults ----------------------------------------------------

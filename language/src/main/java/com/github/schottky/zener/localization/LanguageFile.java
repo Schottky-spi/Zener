@@ -1,7 +1,8 @@
 package com.github.schottky.zener.localization;
 
-import com.github.schottky.zener.util.Tuple;
+import com.github.schottky.zener.api.Tuple;
 import com.google.common.base.Preconditions;
+import org.apiguardian.api.API;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import java.util.Optional;
  * {@link Language}
  */
 
+@API(status = API.Status.STABLE)
 public class LanguageFile {
 
     /**

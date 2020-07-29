@@ -1,6 +1,6 @@
 package com.github.schottky.zener.menu.event;
 
-import com.github.schottky.zener.api.ZenerAPI;
+import com.github.schottky.zener.api.Zener;
 import com.github.schottky.zener.menu.Menu;
 import com.github.schottky.zener.menu.MenuRegistry;
 import org.bukkit.Bukkit;
@@ -72,7 +72,7 @@ public class MenuListeners implements Listener {
         MenuRegistry.forInventory(event.getView().getTopInventory()).ifPresent(menu -> {
             final MenuCloseEvent closeEvent = post(new MenuCloseEvent(menu, event.getPlayer()));
             if (closeEvent.isCancelled()) {
-                Bukkit.getScheduler().runTaskLater(ZenerAPI.providingPlugin(),
+                Bukkit.getScheduler().runTaskLater(Zener.providingPlugin(),
                         () -> menu.openTo(event.getPlayer()), 1);
             }
         });

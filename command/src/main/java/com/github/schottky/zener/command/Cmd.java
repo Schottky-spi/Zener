@@ -1,5 +1,7 @@
 package com.github.schottky.zener.command;
 
+import org.apiguardian.api.API;
+import org.apiguardian.api.API.Status;
 import org.bukkit.permissions.PermissionDefault;
 
 import java.lang.annotation.ElementType;
@@ -13,6 +15,7 @@ import java.lang.annotation.Target;
  * This name must be equal to the name given in the config.yml
  */
 
+@API(status = Status.EXPERIMENTAL)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Cmd {
