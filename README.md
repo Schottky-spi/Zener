@@ -31,7 +31,7 @@ as a hint
             <configuration>
                 <!-- Use this to rename the package 'com.github.schottky.zener' to 'com.github.schottky.zener.<your artifact-id>'.
                      This avoids naming-conflicts and enables multiple plugins to use the same library. You can use any name you want
-                     as the shadedPattern
+                     as the shadedPattern thou it should be unique
                 -->
                 <relocations>
                     <relocation>
@@ -108,14 +108,16 @@ printing this lore has the result
 This utility-class is aimed to simplify calls like these:
 ```
 ItemStack stack = ...;
-Integer value = Objects.requireNonNull(stack.getItemMeta()).getPersistentDataContainer().get(namespacedKey, PersistentDataType.INTEGER);
+Integer value = Objects.requireNonNull(stack.getItemMeta())
+    .getPersistentDataContainer()
+    .get(new NamespacedKey(plugin, name), PersistentDataType.INTEGER);
 if (value != null) {
     // do something
 }
 ```
 to something like
 ```
-ItemStorage.getInt(stack.getItemMeta(), namespacedKey).ifPresent(value -> {
+ItemStorage.getInt(stack.getItemMeta(), name).ifPresent(value -> {
     // do something
 });
 ```
