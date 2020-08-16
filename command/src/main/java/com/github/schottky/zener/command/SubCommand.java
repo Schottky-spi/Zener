@@ -3,11 +3,16 @@ package com.github.schottky.zener.command;
 import org.apiguardian.api.API;
 
 @API(status = API.Status.EXPERIMENTAL)
-public abstract class SubCommand extends CommandBase {
+public abstract class SubCommand<T extends CommandBase> extends CommandBase {
 
-    protected final CommandBase parentCommand;
+    protected final T parentCommand;
 
-    public SubCommand(CommandBase parentCommand) {
+    public SubCommand(T parentCommand) {
+        this(false, parentCommand);
+    }
+
+    SubCommand(boolean methodBased, T parentCommand) {
+        super(methodBased);
         this.parentCommand = parentCommand;
     }
 

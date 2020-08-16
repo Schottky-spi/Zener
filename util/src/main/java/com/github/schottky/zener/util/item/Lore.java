@@ -1,5 +1,6 @@
 package com.github.schottky.zener.util.item;
 
+import com.github.schottky.zener.util.range.Range;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,7 +23,8 @@ public class Lore extends AbstractList<String> implements Collection<String> {
 
     private final List<String> contents = new ArrayList<>();
     private boolean resetAtStart = true;
-    private final String reset = ChatColor.RESET.toString();
+
+    private final static String reset = ChatColor.RESET.toString();
 
     public boolean resetsAtStart() {
         return resetAtStart;
@@ -142,6 +144,15 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     }
 
     /**
+     * Replaces all occurrences of a given pattern to the resulting string
+     * @param from The pattern to replace
+     * @param to The string to replace it with
+     */
+    public void replaceAll(Pattern from, String to) {
+        this.replaceAll(s -> from.matcher(s).find() ? to : s);
+    }
+
+    /**
      * {@inheritDoc}
      */
 
@@ -177,20 +188,10 @@ public class Lore extends AbstractList<String> implements Collection<String> {
     @Override
     public String[] toArray() {
         String[] arr = new String[contents.size()];
-        for (int i = 0; i < arr.length; i++) {
+        for (int i: Range.indexing(arr)) {
             arr[i] = contents.get(i);
         }
         return arr;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-
-    @NotNull
-    @Override
-    public <T> T[] toArray(@NotNull T[] a) {
-        return super.toArray(a);
     }
 
     /**

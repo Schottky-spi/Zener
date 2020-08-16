@@ -74,6 +74,14 @@ class LoreTest {
         assertIterableEquals(someList, lore);
     }
 
+    @Test
+    public void a_lore_replaces_a_pattern() {
+        Lore lore = new Lore("Hello", "Foo123", "World", "Foo234").thatDoesNotResetAtStart();
+        final Pattern pattern = Pattern.compile("Foo");
+        lore.replaceAll(pattern, "Bar");
+        assertIterableEquals(Arrays.asList("Hello", "Bar", "World", "Bar"), lore);
+    }
+
     @Nested class A_lore_adds_multiple_elements {
 
         @Test

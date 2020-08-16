@@ -5,8 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.Schottky-spi</groupId>
-    <artifactId>zener</artifactId>
-    <version>v1.3.1</version>
+    <artifactId>Zener</artifactId>
+    <version>v1.3.1-SNAPSHOT</version>
+
+    <name>Zener-API</name>
+    <description>A Spigot-Library</description>
 
     <modules>
         <module>language</module>
@@ -89,7 +92,7 @@
             <groupId>org.apiguardian</groupId>
             <artifactId>apiguardian-api</artifactId>
             <version>1.1.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>

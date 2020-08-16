@@ -1,5 +1,6 @@
-package com.github.schottky.zener.menu;
+package com.github.schottky.zener.menu.paged;
 
+import com.github.schottky.zener.menu.Menu;
 import com.github.schottky.zener.menu.item.MenuItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -62,13 +63,6 @@ class AbstractPagedMenuTest {
             else assertFalse(dut.navigateToPage(page));
             assertEquals(1, dut.currentPage());
         }
-
-        @Test
-        public void grows_in_size_if_a_new_page_has_been_added() {
-            assertEquals(1, dut.pageCount());
-            dut.setPage(2, new MenuItem[0][0]);
-            assertEquals(2, dut.pageCount());
-        }
     }
 
     @Nested class A_paged_menu_with_multiple_pages {
@@ -86,6 +80,13 @@ class AbstractPagedMenuTest {
             assertEquals(2, dut.currentPage());
         }
 
+    }
+
+    static class MockPagedMenu extends AbstractPagedMenu {
+
+        public MockPagedMenu() {
+            super(Menu.MAX_ROWS, "Mock paged menu");
+        }
     }
 
 }

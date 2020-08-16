@@ -16,6 +16,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
@@ -154,7 +155,8 @@ public class Language {
      * @return true if, and only if the input-string is a valid identifier
      */
 
-    public static boolean isValidIdentifier(String input) {
+    public static boolean isValidIdentifier(@Nullable String input) {
+        if (input == null) return false;
         return VALID_INPUT.matcher(input).matches();
     }
 

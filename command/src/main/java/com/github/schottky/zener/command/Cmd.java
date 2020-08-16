@@ -28,6 +28,13 @@ public @interface Cmd {
     String name();
 
     /**
+     * The simple description. Must be a valid language-identifier
+     * @return The Description
+     */
+
+    String desc() default "";
+
+    /**
      * the permission. If empty, it is assumed to be the same as what was defined in the config.yml
      * If not, a new permission will be registered using this name and this {@link #permDefault()}
      * @return The permission needed to execute this command. Can be empty (as defined in {@link String#isEmpty()})

@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -57,12 +58,15 @@ public class MenuClickEvent extends Event implements Cancellable {
      */
     public final InventoryAction action;
 
+    public final ItemStack currentItem;
+
     public MenuClickEvent(
             HumanEntity clicker,
             ClickType clickType,
             SlotType slotType,
             int slot,
             InventoryAction action,
+            ItemStack currentItem,
             Menu menu)
     {
         this.clicker = clicker;
@@ -71,6 +75,7 @@ public class MenuClickEvent extends Event implements Cancellable {
         this.slotType = slotType;
         this.slot = slot;
         this.action = action;
+        this.currentItem = currentItem;
     }
 
     public MenuClickEvent(@NotNull InventoryClickEvent event, Menu menu) {
@@ -79,6 +84,7 @@ public class MenuClickEvent extends Event implements Cancellable {
                 event.getSlotType(),
                 event.getSlot(),
                 event.getAction(),
+                event.getCurrentItem(),
                 menu);
     }
 

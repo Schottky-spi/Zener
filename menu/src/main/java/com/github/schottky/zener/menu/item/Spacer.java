@@ -1,20 +1,26 @@
 package com.github.schottky.zener.menu.item;
 
 import com.github.schottky.zener.menu.event.MenuClickEvent;
+import com.github.schottky.zener.util.item.Items;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
+/**
+ * A simple menu-item that does nothing on click
+ * and will display a nameless stained glass-pane
+ * with the color defined in the constructor
+ */
 
 public class Spacer implements MenuItem {
 
     private final Material spacerMaterial;
 
-    @Contract(pure = true)
+    /**
+     * creates a new spacer with a defined color
+     * @param color The color that this spacer will have
+     */
     public Spacer(@NotNull DyeColor color) {
         switch (color) {
             case WHITE:
@@ -70,14 +76,10 @@ public class Spacer implements MenuItem {
     }
 
     @Override
-    public void onCLick(@NotNull MenuClickEvent trigger) { /* Do nothing */ }
+    public void onClick(@NotNull MenuClickEvent trigger) { /* Do nothing */ }
 
     @Override
     public ItemStack asItemStack() {
-        ItemStack stack = new ItemStack(spacerMaterial);
-        final ItemMeta meta = Objects.requireNonNull(stack.getItemMeta());
-        meta.setDisplayName(" ");
-        stack.setItemMeta(meta);
-        return stack;
+        return Items.withoutTitle(spacerMaterial);
     }
 }

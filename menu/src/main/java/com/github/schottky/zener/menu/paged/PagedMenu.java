@@ -1,7 +1,17 @@
-package com.github.schottky.zener.menu;
+package com.github.schottky.zener.menu.paged;
 
+import com.github.schottky.zener.menu.Menu;
 import com.github.schottky.zener.menu.item.MenuItem;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * A menu that has pages that can be navigated through.
+ * Most implementations allow adding or removing items after creation
+ */
 public interface PagedMenu extends Menu {
 
     /**
@@ -67,15 +77,48 @@ public interface PagedMenu extends Menu {
         return navigateToPage(1);
     }
 
-    /**
-     * Set the raw contents of a page. The page-number may not be smaller than one, but it may be
-     * bigger than the number of pages currently in this menu. If this is the case, empty pages
-     * are added until this page can be inserted
-     * @param page The page at which to set the contents.
-     * @param items The items to set
-     * @throws IllegalArgumentException if the items do not fit on the page.
-     * It is allowed for the items to be smaller in x-and y direction, but not larger
-     */
 
-    void setPage(int page, MenuItem[][] items) throws IllegalArgumentException;
+    class Builder {
+
+        public Builder(String title) {
+            this.title = title;
+        }
+
+        private final String title;
+        private FlowStyle flowStyle = FlowStyle.LEFT_TO_RIGHT.then(FlowStyle.TOP_TO_BOTTOM);
+        private int rows = Menu.MAX_ROWS;
+        private final List<MenuItem> initialItems = new ArrayList<>();
+
+        public Builder flowStyle(FlowStyle flowStyle) {
+            this.flowStyle = flowStyle;
+            return this;
+        }
+
+        public Builder rows(int rows) {
+            this.rows = rows;
+            return this;
+        }
+
+        public Builder addItems(MenuItem... items) {
+            return this.addItems(Arrays.asList(items));
+        }
+
+        public Builder addItems(Iterable<MenuItem> items) {
+            if (items instanceof Collection) {
+                initialItems.addAll((Collection<? extends MenuItem>) items);
+            } else {
+                for (MenuItem item : items) initialItems.add(item);
+            }
+            return this;
+        }
+
+        public PagedMenu build() {
+            return new ContainerPagedMenu(
+                    rows,
+                    title,
+                    flowStyle,
+                    initialItems.toArray(new MenuItem[0]));
+        }
+
+    }
 }

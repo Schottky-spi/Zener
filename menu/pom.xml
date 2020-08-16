@@ -5,24 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>zener-menu</artifactId>
-    <version>v0.1-SNAPSHOT</version>
+    <version>v0.9.9.3-SNAPSHOT</version>
 
     <parent>
-        <artifactId>zener</artifactId>
+        <artifactId>Zener</artifactId>
         <groupId>com.github.Schottky-spi</groupId>
-        <version>v1.3.1</version>
+        <version>v1.3.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
             <artifactId>zener-api</artifactId>
-            <version>v1.0</version>
+            <version>v1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.github.Schottky-spi</groupId>
             <artifactId>zener-util</artifactId>
-            <version>v1.0</version>
+            <version>v1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

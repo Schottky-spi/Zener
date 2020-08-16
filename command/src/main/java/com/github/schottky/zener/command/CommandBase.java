@@ -10,6 +10,7 @@ import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -21,11 +22,12 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     static {
         Language.addDefaults(
-                "message.permission_denied", "&6You do not have permission",
-                "message.not_executable_as_player", "&6You cannot execute this as a player",
-                "message.not_executable_as_console", "&6You cannot execute this as console",
-                "message.too_few_arguments", "&6Too few arguments! Provide at least {args}",
-                "message.too_many_arguments", "&6Too many arguments!");
+                "command.permission_denied", "&6You do not have permission",
+                "command.not_executable_as_player", "&6You cannot execute this as a player",
+                "command.not_executable_as_console", "&6You cannot execute this as console",
+                "command.too_few_arguments", "&6Too few arguments! Provide at least {args}",
+                "command.too_many_arguments", "&6Too many arguments!",
+                "command.not_executable_as", "&6You cannot execute this command");
     }
 
     /**The permission a {@link org.bukkit.permissions.Permissible} must have to execute this command*/
@@ -33,10 +35,15 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     /**The minimum, resp. maximum number of arguments this command may have*/
     protected int minArgsLength, maxArgsLength;
 
-    protected Set<String> aliases;
+    protected Set<String> aliases = new HashSet<>();
 
     public CommandBase() {
-        injectCmdAnnotation();
+        this(false);
+    }
+
+    CommandBase(boolean methodBased) {
+        if (!methodBased) injectCmdAnnotation();
+        scanForSubCommands();
     }
 
     /**
@@ -201,7 +208,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     // ------- SUB-COMMANDS -------
 
     /**A list of sub-commands to this command*/
-    protected final Set<SubCommand> subCommands = new HashSet<>();
+    protected final Set<SubCommand<?>> subCommands = new HashSet<>();
 
     /**
      * finds the last sub-command that can be matched with the given String-input.
@@ -213,7 +220,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     CommandBase findSubCommand(String[] args) {
         if (this.subCommands.isEmpty() || args.length == 0) return this;
-        for (SubCommand cmd : subCommands) {
+        for (SubCommand<?> cmd : subCommands) {
             if (cmd.name.equalsIgnoreCase(args[0]) ||
                     cmd.aliases.contains(args[0].toLowerCase())) {
                 return cmd.findSubCommand(ArrayUtil.popFirstN(args, 1));
@@ -244,8 +251,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         String permission = cmd.permission().isEmpty() ?
                 Objects.requireNonNull(Bukkit.getPluginCommand(name)).getPermission() :
                 cmd.permission();
-        this.permission = new Permission(Objects.requireNonNull(permission));
-        this.permission = new Permission(cmd.permission(), cmd.permDefault());
+        this.permission = new Permission(Objects.requireNonNull(permission), cmd.permDefault());
         this.minArgsLength = cmd.minArgs();
         this.maxArgsLength = cmd.maxArgs();
         this.aliases = new HashSet<>();
@@ -254,12 +260,21 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void scanForSubCommands() {
+        for (final Method method: this.getClass().getDeclaredMethods()) {
+            if (method.isAnnotationPresent(SubCmd.class)) {
+                MethodBasedSubCommand<?> methodBasedSubCommand = new MethodBasedSubCommand<>(method, this);
+                this.subCommands.add(methodBasedSubCommand);
+            }
+        }
+    }
+
     /**
      * registers any Sub-command of this command
      * @param subCommands The sub-commands to register
      */
 
-    public void registerSubCommands(SubCommand... subCommands) {
+    public void registerSubCommands(SubCommand<?>... subCommands) {
         this.subCommands.addAll(Arrays.asList(subCommands));
     }
 
@@ -275,6 +290,14 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     public String name() {
         return name;
+    }
+
+    protected String simpleDescription;
+
+    public String simpleDescription() {
+        return Language.isValidIdentifier(simpleDescription) ?
+                Language.current().translate(simpleDescription) :
+                simpleDescription;
     }
 
     /**

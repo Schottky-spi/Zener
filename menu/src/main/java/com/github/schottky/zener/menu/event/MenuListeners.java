@@ -10,6 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,37 +23,24 @@ public class MenuListeners implements Listener {
         MenuRegistry.forInventory(view.getTopInventory()).ifPresent(menu -> {
             if (event.getClickedInventory() == view.getTopInventory()) {
                 switch (event.getAction()) {
-                    case PICKUP_ALL:
-                    case PICKUP_SOME:
-                    case PICKUP_HALF:
-                    case PICKUP_ONE:
-                    case MOVE_TO_OTHER_INVENTORY:
-                    case HOTBAR_MOVE_AND_READD:
-                    case HOTBAR_SWAP:
-                    case COLLECT_TO_CURSOR:
-                        handleMenuClick(menu, event);
-                        break;
                     case PLACE_ALL:
                     case PLACE_SOME:
                     case PLACE_ONE:
                     case SWAP_WITH_CURSOR:
                         handleMenuTarget(menu, event);
                         break;
-                    case DROP_ALL_CURSOR:
-                    case DROP_ONE_CURSOR:
-                    case DROP_ALL_SLOT:
-                    case DROP_ONE_SLOT:
-                    case CLONE_STACK:
-                    case NOTHING:
-                    case UNKNOWN:
                     default:
-                        break;
+                        handleMenuClick(menu, event);
                 }
-                handleMenuClick(menu, event);
             } else {
                 handleMenuTarget(menu, event);
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryDrag(@NotNull InventoryDragEvent event) {
+
     }
 
     private void handleMenuClick(Menu menu, InventoryClickEvent event) {
@@ -64,6 +52,7 @@ public class MenuListeners implements Listener {
 
     private void handleMenuTarget(Menu menu, @NotNull InventoryClickEvent event) {
         final MenuTargetEvent menuTargetEvent = post(new MenuTargetEvent(event, menu));
+        menu.onTarget(menuTargetEvent);
         if (menuTargetEvent.isCancelled()) event.setCancelled(true);
     }
 

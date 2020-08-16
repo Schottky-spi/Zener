@@ -25,23 +25,23 @@ public class Console {
     private static final ConsoleCommandSender console = Bukkit.getConsoleSender();
 
     public static void info(Object message, Object... args) {
-        log(Level.INFO, message);
+        log(Level.INFO, message, args);
     }
 
     public static void severe(Object message, Object... args) {
-        log(Level.SEVERE, message);
+        log(Level.SEVERE, message, args);
     }
 
     public static void success(Object message, Object... args) {
-        log(Level.SUCCESS, message);
+        log(Level.SUCCESS, message, args);
     }
 
     public static void debug(Object message, Object... args) {
-        log(Level.DEBUG, message);
+        log(Level.DEBUG, message, args);
     }
 
     public static void warning(Object message, Object... args) {
-        log(Level.WARNING, message);
+        log(Level.WARNING, message, args);
     }
 
     public static void error(@NotNull Throwable e) {

@@ -1,0 +1,18 @@
+enable: true
+some:
+  random:
+    path: 23.0
+x: 'new Void()'
+person:
+  name: Peter
+  surname: Zumthor
+vector:
+  ==: org.bukkit.util.Vector
+  x: 1.0
+  y: 2.0
+  z: 3.0
+material: GOLDEN_APPLE
+list:
+  - 'first'
+  - 'second'
+  - 'nth'

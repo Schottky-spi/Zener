@@ -35,6 +35,7 @@ class AbstractMenuTest {
                 InventoryType.SlotType.OUTSIDE,
                 slot,
                 InventoryAction.PICKUP_ONE,
+                null,
                 dut);
     }
 
@@ -49,9 +50,9 @@ class AbstractMenuTest {
         @ParameterizedTest
         @ValueSource(ints = {0, 2, 5})
         public void can_be_added_as_row(int row) {
-            final boolean[] triggered = new boolean[dut.columns()];
+            final boolean[] triggered = new boolean[dut.columnCount()];
             dut.setRow(row, i -> new SimpleMenuItem(e -> triggered[i] = true, null));
-            for (int x = 0; x < dut.columns(); x++) {
+            for (int x = 0; x < dut.columnCount(); x++) {
                 dut.clickSlot(x, row, mockTrigger(-1));
             }
             for (int i = 0; i < triggered.length; i++) {
@@ -62,9 +63,9 @@ class AbstractMenuTest {
         @ParameterizedTest
         @ValueSource(ints = {0, 4, 8})
         public void can_be_added_as_column(int column) {
-            final boolean[] triggered = new boolean[dut.rows()];
+            final boolean[] triggered = new boolean[dut.rowCount()];
             dut.setColumn(column, i -> new SimpleMenuItem(e -> triggered[i] = true, null));
-            for (int y = 0; y < dut.rows(); y++) {
+            for (int y = 0; y < dut.rowCount(); y++) {
                 dut.clickSlot(column, y, mockTrigger(-1));
             }
             for (int i = 0; i < triggered.length; i++) {
@@ -114,10 +115,6 @@ class AbstractMenuTest {
             dut.clickSlot(correctAbsolute, event);
             assertTrue(triggered[0], "Incorrect field triggered");
         }
-    }
-
-    @Nested class When_a_player_clicks_an_inventory {
-
     }
 
 }
