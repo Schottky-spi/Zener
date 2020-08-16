@@ -258,6 +258,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         for (String alias: cmd.aliases()) {
             aliases.add(alias.toLowerCase());
         }
+        this.simpleDescription = cmd.desc();
     }
 
     private void scanForSubCommands() {
