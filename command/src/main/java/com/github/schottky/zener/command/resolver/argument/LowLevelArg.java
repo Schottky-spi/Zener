@@ -9,6 +9,12 @@ public interface LowLevelArg<T> extends Argument<T> {
 
     void resolve(String arg, CommandContext context) throws ArgumentNotResolvable;
 
-    Stream<String> tabCompletions();
+    Stream<T> options(CommandContext context);
+
+    String toString(T value);
+
+    default Stream<String> optionsAsString(CommandContext context) {
+        return options(context).map(this::toString);
+    }
 
 }

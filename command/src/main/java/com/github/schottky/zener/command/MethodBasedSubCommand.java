@@ -3,6 +3,9 @@ package com.github.schottky.zener.command;
 import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
 import com.github.schottky.zener.command.resolver.ArgumentResolver;
 import com.github.schottky.zener.command.resolver.SuccessMessage;
+import com.github.schottky.zener.command.resolver.argument.HighLevelArg;
+import com.github.schottky.zener.command.resolver.argument.LowLevelArg;
+import com.github.schottky.zener.messaging.Console;
 import com.google.common.base.Preconditions;
 import org.apiguardian.api.API;
 import org.bukkit.command.Command;
@@ -10,9 +13,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @API(status = API.Status.INTERNAL)
 public final class MethodBasedSubCommand<T extends CommandBase> extends SubCommand<T> {
@@ -36,9 +44,15 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         this.aliases.addAll(Arrays.asList(subCmd.aliases()));
         this.simpleDescription = subCmd.desc();
         this.maxArgsLength = Integer.MAX_VALUE;
+        this.parameterTypes = method.getParameterTypes();
+        this.parameterAnnotations = method.getParameterAnnotations();
+
         if (method.isAnnotationPresent(SuccessMessage.class))
             successMessage = method.getAnnotation(SuccessMessage.class).value();
     }
+
+    private final Class<?>[] parameterTypes;
+    private final Annotation[][] parameterAnnotations;
 
     @Override
     public boolean onAcceptedCommand(
@@ -47,18 +61,44 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
             @NotNull String label,
             @NotNull String[] args)
     {
-        final CommandContext context = new CommandContext(sender, command, label);
+        final CommandContext context = new CommandContext(sender, command, label, args);
+        Object[] resolved;
         try {
-            new ArgumentResolver(args).execute(method, context, parentCommand);
+            resolved = new ArgumentResolver(args).resolve(parameterTypes, parameterAnnotations, context);
         } catch (ArgumentNotResolvable notResolvable) {
             sender.sendMessage(notResolvable.getMessage());
             return true;
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
+        }
+
+        try {
+            method.invoke(parentCommand, resolved);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            Console.error(e);
             return true;
         }
+
         if (successMessage != null)
             context.getSender().sendMessage(successMessage);
         return true;
+    }
+
+
+    @Override
+    public @NotNull List<String> onTabComplete(
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String label,
+            @NotNull String[] args)
+    {
+        final CommandContext context = new CommandContext(sender, command, label, args);
+        final HighLevelArg<?> superArg = new ArgumentResolver(args).computeRoot(parameterTypes, parameterAnnotations);
+        final LowLevelArg<?> arg = superArg.findLastArgument(new LinkedList<>(Arrays.asList(args)), context);
+        if (arg == null)
+            return Collections.emptyList();
+        else
+            return arg.optionsAsString(context)
+                    .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
+                    .collect(Collectors.toList());
+
     }
 }

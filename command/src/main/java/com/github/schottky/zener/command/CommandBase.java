@@ -194,10 +194,10 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      */
 
     protected @Nullable List<String> tabCompleteOptionsFor(
-            CommandSender sender,
-            Command command,
-            String label,
-            String[] args)
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String label,
+            @NotNull String[] args)
     {
         return CollectionUtil.modifiableListUsing(subCommands, subCommand -> subCommand.name);
     }

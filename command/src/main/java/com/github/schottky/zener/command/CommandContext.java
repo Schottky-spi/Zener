@@ -8,10 +8,11 @@ import org.bukkit.entity.Player;
 
 public class CommandContext {
 
-    public CommandContext(CommandSender sender, Command command, String label) {
+    public CommandContext(CommandSender sender, Command command, String label, String[] rawArgs) {
         this.sender = sender;
         this.command = command;
         this.label = label;
+        this.rawArgs = rawArgs;
     }
 
     private final CommandSender sender;
@@ -42,5 +43,11 @@ public class CommandContext {
 
     public String getLabel() {
         return label;
+    }
+
+    private final String[] rawArgs;
+
+    public String[] getRawArgs() {
+        return rawArgs;
     }
 }

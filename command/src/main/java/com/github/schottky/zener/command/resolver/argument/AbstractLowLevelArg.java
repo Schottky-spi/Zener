@@ -27,8 +27,20 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
         return value;
     }
 
+    private Stream<T> options = Stream.of();
+
     @Override
-    public Stream<String> tabCompletions() {
-        return Stream.of();
+    public Stream<T> options(CommandContext context) {
+        return options;
+    }
+
+    @Override
+    public String toString(T value) {
+        return value.toString();
+    }
+
+    public AbstractLowLevelArg<T> withOptions(Stream<T> options) {
+        this.options = options;
+        return this;
     }
 }
