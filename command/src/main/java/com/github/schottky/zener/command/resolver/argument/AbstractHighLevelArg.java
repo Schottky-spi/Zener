@@ -1,7 +1,7 @@
 package com.github.schottky.zener.command.resolver.argument;
 
 import com.github.schottky.zener.command.CommandContext;
-import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
+import com.github.schottky.zener.command.resolver.CommandException;
 
 import java.util.Deque;
 
@@ -31,7 +31,7 @@ public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
                 else {
                     try {
                         lowLevelArg.resolve(arguments.pop(), context);
-                    } catch (ArgumentNotResolvable notResolvable) {
+                    } catch (CommandException notResolvable) {
                         return null;
                     }
                 }

@@ -1,6 +1,10 @@
 package com.github.schottky.zener.command;
 
 import com.github.schottky.zener.localization.Language;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
 import org.bukkit.Bukkit;
@@ -71,6 +75,9 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         }
         CommandBase base = findSubCommand(arguments);
         String[] newArgs = ArrayUtil.popFirstN(arguments, base.computeDepth());
+        if (newArgs.length == 0 && !subCommands.isEmpty()) {
+
+        }
         if (newArgs.length < base.minArgsLength) {
             sender.sendMessage(base.tooFewArgumentsMessage(base.minArgsLength - newArgs.length));
             return true;
@@ -84,6 +91,21 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     private String labelUsed(@NotNull CommandBase base, String[] args, String originalLabel) {
         int depth = base.computeDepth();
         return depth == 0 ? originalLabel : args[depth - 1];
+    }
+
+    private BaseComponent[] createNiceDescription(SubCommand<?> subCommand) {
+        final BaseComponent[] command = new ComponentBuilder()
+                .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + this.name() + subCommand.name()))
+                .append("/turnstile ")
+                .color(ChatColor.AQUA)
+                .append(subCommand.name())
+                .create();
+        return new ComponentBuilder()
+                .append(command)
+                .reset()
+                .append(" - ")
+                .append(subCommand.simpleDescription())
+                .create();
     }
 
     /**

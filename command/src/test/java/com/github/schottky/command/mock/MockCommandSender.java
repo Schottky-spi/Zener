@@ -11,12 +11,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 public abstract class MockCommandSender implements CommandSender {
+
+    public static Consumer<String> callback;
 
     @Override
     public void sendMessage(@NotNull String message) {
         System.out.println("[to " + this.getClass().getSimpleName() + "] " + message);
+        if (callback != null) callback.accept(message);
     }
 
     @Override

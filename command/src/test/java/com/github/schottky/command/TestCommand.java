@@ -3,6 +3,7 @@ package com.github.schottky.command;
 import com.github.schottky.zener.command.Cmd;
 import com.github.schottky.zener.command.CommandBase;
 import com.github.schottky.zener.command.SubCmd;
+import com.github.schottky.zener.command.resolver.CommandException;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Consumer;
@@ -20,6 +21,11 @@ public class TestCommand extends CommandBase {
     @SubCmd("varArgsCmd")
     public void varArgsCmd(ItemStack arg1) {
         if (callback != null) callback.accept(new Object[] {arg1});
+    }
+
+    @SubCmd("throwingCmd")
+    public void throwingCmd() throws CommandException {
+        throw new CommandException("throws");
     }
 
 

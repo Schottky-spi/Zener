@@ -39,6 +39,7 @@ public class ArgumentResolver {
         argumentFactories.put(clazz, factory);
     }
 
+    @FunctionalInterface
     public interface ArgumentFactory {
         Argument<?> create();
     }
@@ -50,7 +51,7 @@ public class ArgumentResolver {
         this.args = args;
     }
 
-    public Object[] resolve(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, CommandContext context) throws ArgumentNotResolvable {
+    public Object[] resolve(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, CommandContext context) throws CommandException {
         final Object[] parameters = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
             final Class<?> type = parameterTypes[i];
@@ -71,7 +72,7 @@ public class ArgumentResolver {
         return parameters;
     }
 
-    private Object getUnresolvedFromContext(Class<?> clazz, CommandContext context) {
+    private Object getUnresolvedFromContext(Class<?> clazz, CommandContext context) throws CommandException {
         if (clazz.isAssignableFrom(Player.class)) {
             return context.getPlayer();
         } else if (clazz.isAssignableFrom(ConsoleCommandSender.class)) {
@@ -93,12 +94,12 @@ public class ArgumentResolver {
         return false;
     }
 
-    public void resolve(Argument<?> argument, CommandContext context) throws ArgumentNotResolvable {
+    public void resolve(Argument<?> argument, CommandContext context) throws CommandException {
         Argument<?> arg = resolveAndReturnLast(argument, context);
         if (arg != null) throw ArgumentNotResolvable.withMessage("Too few args!");
     }
 
-    public Argument<?> resolveAndReturnLast(Argument<?> argument, CommandContext context) throws ArgumentNotResolvable {
+    public Argument<?> resolveAndReturnLast(Argument<?> argument, CommandContext context) throws CommandException {
         if (argument instanceof VarArgsArgument<?>) {
             VarArgsArgument<?> arg = (VarArgsArgument<?>) argument;
             if (args.length - cursor < arg.minArgs()) throw ArgumentNotResolvable.withMessage("Too few args");

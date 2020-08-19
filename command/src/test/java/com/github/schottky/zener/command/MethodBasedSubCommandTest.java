@@ -2,6 +2,7 @@ package com.github.schottky.zener.command;
 
 import com.github.schottky.command.TestCommand;
 import com.github.schottky.command.mock.MockCommand;
+import com.github.schottky.command.mock.MockCommandSender;
 import com.github.schottky.command.mock.MockPlayer;
 import com.github.schottky.command.mock.MockServer;
 import org.bukkit.Bukkit;
@@ -70,6 +71,12 @@ class MethodBasedSubCommandTest {
     public void a_subcommand_does_not_accept_incorrect_arguments() {
         base.callback = args -> fail("Successfully executed command, but wrong arguments provided");
         assertDoesNotThrow(() -> dispatchCommand("subCmd", "1.0", "true"));
+    }
+
+    @Test
+    public void a_command_exception_is_caught() {
+        MockCommandSender.callback = s -> assertEquals("throws", s, "throwing command not throwing");
+        dispatchCommand("throwingCmd");
     }
 
 }

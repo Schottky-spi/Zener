@@ -1,7 +1,7 @@
 package com.github.schottky.zener.command;
 
-import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
 import com.github.schottky.zener.command.resolver.ArgumentResolver;
+import com.github.schottky.zener.command.resolver.CommandException;
 import com.github.schottky.zener.command.resolver.SuccessMessage;
 import com.github.schottky.zener.command.resolver.argument.HighLevelArg;
 import com.github.schottky.zener.command.resolver.argument.LowLevelArg;
@@ -65,14 +65,23 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         Object[] resolved;
         try {
             resolved = new ArgumentResolver(args).resolve(parameterTypes, parameterAnnotations, context);
-        } catch (ArgumentNotResolvable notResolvable) {
-            sender.sendMessage(notResolvable.getMessage());
+            if (resolved == null)
+                return true;
+        } catch (CommandException exception) {
+            sender.sendMessage(exception.getMessage());
             return true;
         }
 
         try {
             method.invoke(parentCommand, resolved);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof CommandException) {
+                sender.sendMessage(e.getCause().getMessage());
+            } else {
+                Console.error(e);
+            }
+            return true;
+        } catch (IllegalAccessException e) {
             Console.error(e);
             return true;
         }
@@ -95,10 +104,14 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         final LowLevelArg<?> arg = superArg.findLastArgument(new LinkedList<>(Arrays.asList(args)), context);
         if (arg == null)
             return Collections.emptyList();
-        else
-            return arg.optionsAsString(context)
-                    .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
-                    .collect(Collectors.toList());
-
+        else {
+            try {
+                return arg.optionsAsString(context)
+                        .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
+                        .collect(Collectors.toList());
+            } catch (CommandException e) {
+                return Collections.emptyList();
+            }
+        }
     }
 }

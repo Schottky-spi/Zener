@@ -1,7 +1,7 @@
 package com.github.schottky.zener.command.resolver.argument;
 
 import com.github.schottky.zener.command.CommandContext;
-import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
+import com.github.schottky.zener.command.resolver.CommandException;
 
 import java.util.stream.Stream;
 
@@ -16,11 +16,11 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
     private T value;
 
     @Override
-    public void resolve(String arg, CommandContext context) throws ArgumentNotResolvable {
+    public void resolve(String arg, CommandContext context) throws CommandException {
         this.value = fromArgument(arg, context);
     }
 
-    protected abstract T fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable;
+    protected abstract T fromArgument(String arg, CommandContext context) throws CommandException;
 
     @Override
     public T value() {
@@ -30,7 +30,7 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
     private Stream<T> options = Stream.of();
 
     @Override
-    public Stream<T> options(CommandContext context) {
+    public Stream<T> options(CommandContext context) throws CommandException {
         return options;
     }
 
