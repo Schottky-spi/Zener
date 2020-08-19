@@ -25,7 +25,7 @@ public @interface Cmd {
      * @return The name
      */
 
-    String name();
+    String value();
 
     /**
      * The simple description. Must be a valid language-identifier

@@ -373,9 +373,11 @@ public class MockServer implements Server {
         throw new UnsupportedOperationException();
     }
 
+    private final ConsoleCommandSender sender = new MockConsoleCommandSender();
+
     @Override
     public @NotNull ConsoleCommandSender getConsoleSender() {
-        throw new UnsupportedOperationException();
+        return sender;
     }
 
     @Override

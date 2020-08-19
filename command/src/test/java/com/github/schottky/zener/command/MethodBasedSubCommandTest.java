@@ -72,16 +72,4 @@ class MethodBasedSubCommandTest {
         assertDoesNotThrow(() -> dispatchCommand("subCmd", "1.0", "true"));
     }
 
-    @Cmd(name = "illegal", permission = "x")
-    static class IllegalTestCommand extends CommandBase {
-
-        @SubCmd("illegal2")
-        public void onCommand() { }
-    }
-
-    @Test
-    public void a_sub_command_without_arguments_cannot_be_created() {
-        assertThrows(IllegalArgumentException.class, IllegalTestCommand::new);
-    }
-
 }

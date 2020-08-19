@@ -7,6 +7,7 @@
     <groupId>com.github.Schottky-spi</groupId>
     <artifactId>Zener</artifactId>
     <version>v1.3.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>Zener-API</name>
     <description>A Spigot-Library</description>
@@ -19,8 +20,6 @@
         <module>api</module>
         <module>util</module>
     </modules>
-
-    <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -92,7 +91,7 @@
             <groupId>org.apiguardian</groupId>
             <artifactId>apiguardian-api</artifactId>
             <version>1.1.0</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>

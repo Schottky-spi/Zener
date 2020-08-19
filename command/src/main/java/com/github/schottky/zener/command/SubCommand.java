@@ -8,11 +8,6 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
     protected final T parentCommand;
 
     public SubCommand(T parentCommand) {
-        this(false, parentCommand);
-    }
-
-    SubCommand(boolean methodBased, T parentCommand) {
-        super(methodBased);
         this.parentCommand = parentCommand;
     }
 

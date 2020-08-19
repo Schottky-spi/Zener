@@ -38,11 +38,9 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     protected Set<String> aliases = new HashSet<>();
 
     public CommandBase() {
-        this(false);
-    }
-
-    CommandBase(boolean methodBased) {
-        if (!methodBased) injectCmdAnnotation();
+        if (this.getClass().isAnnotationPresent(Cmd.class)) {
+            injectCmdAnnotation();
+        }
         scanForSubCommands();
     }
 
@@ -80,7 +78,6 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             sender.sendMessage(base.tooManyArgumentsMessage(newArgs.length - base.maxArgsLength));
             return true;
         }
-
         return base.onAcceptedCommand(sender, command, labelUsed(base, arguments, label), newArgs);
     }
 
@@ -247,7 +244,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         Cmd cmd = ReflectionUtil.annotationFor(this.getClass(), Cmd.class)
                 .orElseThrow(() -> new RuntimeException("No Annotation 'Cmd' present at Command-class" + this.getClass()));
 
-        this.name = cmd.name();
+        this.name = cmd.value();
         String permission = cmd.permission().isEmpty() ?
                 Objects.requireNonNull(Bukkit.getPluginCommand(name)).getPermission() :
                 cmd.permission();
