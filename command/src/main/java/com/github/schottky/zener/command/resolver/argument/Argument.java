@@ -1,5 +1,7 @@
 package com.github.schottky.zener.command.resolver.argument;
 
+import com.github.schottky.zener.command.CommandContext;
+import com.github.schottky.zener.command.resolver.CommandException;
 import org.jetbrains.annotations.Nullable;
 
 public interface Argument<T> {
@@ -9,6 +11,10 @@ public interface Argument<T> {
     boolean isOptionalArgument();
 
     T value();
+
+    default T value(CommandContext context) throws CommandException {
+        return value();
+    }
 
     default int asInt() {
         if (value() instanceof Integer)

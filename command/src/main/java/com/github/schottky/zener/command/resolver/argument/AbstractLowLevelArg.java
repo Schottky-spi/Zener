@@ -5,6 +5,7 @@ import com.github.schottky.zener.command.resolver.CommandException;
 import com.github.schottky.zener.localization.Language;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
@@ -29,11 +30,11 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
         return value;
     }
 
-    private Stream<T> options = Stream.of();
+    private Function<CommandContext, Stream<T>> optionsSupplier = context -> Stream.empty();
 
     @Override
     public Stream<T> options(CommandContext context) throws CommandException {
-        return options;
+        return optionsSupplier.apply(context);
     }
 
     @Override
@@ -42,7 +43,12 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
     }
 
     public AbstractLowLevelArg<T> withOptions(Stream<T> options) {
-        this.options = options;
+        this.optionsSupplier = (context) -> options;
+        return this;
+    }
+
+    public AbstractLowLevelArg<T> withOptions(Function<CommandContext,Stream<T>> optionsSupplier) {
+        this.optionsSupplier = optionsSupplier;
         return this;
     }
 

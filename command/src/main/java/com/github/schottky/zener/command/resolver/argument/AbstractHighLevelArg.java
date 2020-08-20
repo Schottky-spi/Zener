@@ -16,12 +16,12 @@ public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
     }
 
     @Override
-    public Argument<?>[] contents() {
+    public Argument<?>[] contents(CommandContext context) {
         return contents;
     }
 
     public LowLevelArg<?> findLastArgument(Deque<String> arguments, CommandContext context) {
-        for (Argument<?> arg: contents) {
+        for (Argument<?> arg: contents(context)) {
             if (arg instanceof HighLevelArg<?>) {
                 return ((HighLevelArg<?>) arg).findLastArgument(arguments, context);
             } else if (arg instanceof LowLevelArg<?>) {

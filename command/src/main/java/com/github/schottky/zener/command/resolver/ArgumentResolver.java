@@ -67,7 +67,7 @@ public class ArgumentResolver {
                 }
                 final Argument<?> argument = factory.create();
                 resolve(argument, context);
-                parameters[i] = argument.value();
+                parameters[i] = argument.value(context);
             }
         }
         return parameters;
@@ -105,14 +105,14 @@ public class ArgumentResolver {
             VarArgsArgument<?> arg = (VarArgsArgument<?>) argument;
             if (args.length - cursor < arg.minArgs()) throw ArgumentNotResolvable.withMessage("Too few args");
             if (args.length - cursor > arg.maxArgs()) throw ArgumentNotResolvable.withMessage("Too many args");
-            final Argument<?>[] content = arg.contents();
+            final Argument<?>[] content = arg.contents(context);
             final int rest = args.length - cursor;
             for (int i = 0; i < rest; i++) {
                 resolve(content[i], context);
             }
         } else if (argument instanceof HighLevelArg) {
             HighLevelArg<?> arg = (HighLevelArg<?>) argument;
-            final Argument<?>[] contents = arg.contents();
+            final Argument<?>[] contents = arg.contents(context);
             for (Argument<?> content: contents) {
                 resolve(content, context);
             }

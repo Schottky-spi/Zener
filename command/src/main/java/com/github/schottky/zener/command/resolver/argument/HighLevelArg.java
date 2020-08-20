@@ -7,7 +7,7 @@ import java.util.Deque;
 
 public interface HighLevelArg<T> extends Argument<T> {
 
-    Argument<?>[] contents() throws CommandException;
+    Argument<?>[] contents(CommandContext context) throws CommandException;
 
     LowLevelArg<?> findLastArgument(Deque<String> arguments, CommandContext context);
 
