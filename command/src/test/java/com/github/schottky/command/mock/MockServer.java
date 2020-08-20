@@ -144,6 +144,16 @@ public class MockServer implements Server {
     }
 
     @Override
+    public int getTicksPerWaterSpawns() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getTicksPerAmbientSpawns() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public @Nullable Player getPlayer(@NotNull String name) {
         throw new UnsupportedOperationException();
     }
@@ -281,6 +291,11 @@ public class MockServer implements Server {
     @Override
     public void resetRecipes() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeRecipe(@NotNull NamespacedKey key) {
+        return false;
     }
 
     @Override

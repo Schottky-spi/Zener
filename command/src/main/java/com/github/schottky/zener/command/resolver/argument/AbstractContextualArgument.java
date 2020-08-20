@@ -3,6 +3,7 @@ package com.github.schottky.zener.command.resolver.argument;
 import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
 import com.github.schottky.zener.command.resolver.CommandException;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * base class for an argument that is resolved solely based on it's context
@@ -41,5 +42,15 @@ public abstract class AbstractContextualArgument<T> implements ContextualArgumen
     @Override
     public T value() {
         return value;
+    }
+
+    @Override
+    public boolean isOptionalArgument() {
+        return false;
+    }
+
+    @Override
+    public @Nullable String description() {
+        return null;
     }
 }

@@ -444,6 +444,16 @@ public class MockPlayer extends MockCommandSender implements Player {
     }
 
     @Override
+    public void sendExperienceChange(float progress) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendExperienceChange(float progress, int level) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public float getExhaustion() {
         throw new UnsupportedOperationException();
     }
@@ -899,6 +909,11 @@ public class MockPlayer extends MockCommandSender implements Player {
     }
 
     @Override
+    public float getAttackCooldown() {
+        return 0;
+    }
+
+    @Override
     public boolean discoverRecipe(@NotNull NamespacedKey recipe) {
         throw new UnsupportedOperationException();
     }
@@ -1161,6 +1176,21 @@ public class MockPlayer extends MockCommandSender implements Player {
     @Override
     public boolean hasAI() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void attack(@NotNull Entity target) {
+
+    }
+
+    @Override
+    public void swingMainHand() {
+
+    }
+
+    @Override
+    public void swingOffHand() {
+
     }
 
     @Override

@@ -1,6 +1,12 @@
 package com.github.schottky.zener.command.resolver.argument;
 
+import org.jetbrains.annotations.Nullable;
+
 public interface Argument<T> {
+
+    @Nullable String description();
+
+    boolean isOptionalArgument();
 
     T value();
 

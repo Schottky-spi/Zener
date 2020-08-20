@@ -1,6 +1,7 @@
 package com.github.schottky.zener.command.resolver.argument;
 
 import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
+import com.github.schottky.zener.command.resolver.CommandException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -16,7 +17,7 @@ class ArgumentsTest {
 
         @ParameterizedTest
         @ValueSource(ints = {-100, -50, 0, 49, 100})
-        public void will_be_converted_to_its_value(int actual) throws ArgumentNotResolvable {
+        public void will_be_converted_to_its_value(int actual) throws CommandException {
             intArgument.resolve(String.valueOf(actual), null);
             assertEquals(actual, intArgument.value());
         }

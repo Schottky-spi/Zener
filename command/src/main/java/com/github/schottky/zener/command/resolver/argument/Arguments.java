@@ -102,9 +102,12 @@ public class Arguments {
 
     public static class MaterialArgument extends AbstractLowLevelArg<Material> {
 
-        public MaterialArgument(Material initialValue) { super(initialValue); }
+        public MaterialArgument(Material initialValue) {
+            super(initialValue);
+            this.description = "type";
+        }
 
-        public MaterialArgument() { super(); }
+        public MaterialArgument() { this.description = "type"; }
 
         @Override
         protected Material fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
@@ -137,9 +140,14 @@ public class Arguments {
 
     public static class OfflinePlayerArg extends AbstractLowLevelArg<OfflinePlayer> {
 
-        public OfflinePlayerArg(OfflinePlayer initialValue) { super(initialValue); }
+        public OfflinePlayerArg(OfflinePlayer initialValue) {
+            super(initialValue);
+            this.description = "player";
+        }
 
-        public OfflinePlayerArg() { super(); }
+        public OfflinePlayerArg() {
+            this.description = "player";
+        }
 
         @Override
         protected OfflinePlayer fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
@@ -167,9 +175,14 @@ public class Arguments {
 
     public static class PlayerArg extends AbstractLowLevelArg<Player> {
 
-        public PlayerArg(Player initialValue) { super(initialValue); }
+        public PlayerArg(Player initialValue) {
+            super(initialValue);
+            this.description = "player";
+        }
 
-        public PlayerArg() { super(); }
+        public PlayerArg() {
+            this.description = "player";
+        }
 
         @Override
         protected Player fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
@@ -201,8 +214,10 @@ public class Arguments {
     public static class ItemStackArgument extends AbstractHighLevelVarArg<ItemStack> {
 
         public ItemStackArgument() {
-            super(new MaterialArgument(),
-                    new IntArgument(1).withOptions(Stream.of(1, 32, 64)));
+            super(new MaterialArgument().withDescription("type"),
+                    new IntArgument(1)
+                            .withOptions(Stream.of(1, 32, 64))
+                            .withDescription("amount", true));
         }
 
         @Override

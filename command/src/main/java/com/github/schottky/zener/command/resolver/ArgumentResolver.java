@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ public class ArgumentResolver {
         throw new UnsupportedOperationException("Type " + clazz + " cannot be injected unresolved");
     }
 
-    private boolean containsUnresolved(Annotation[] annotations) {
+    private static boolean containsUnresolved(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
             if (annotation instanceof Unresolved) return true;
         }
@@ -130,19 +131,37 @@ public class ArgumentResolver {
     public HighLevelArg<?> computeRoot(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
         final List<Argument<?>> arguments = new ArrayList<>();
         for (int i = 0; i < parameterTypes.length; i++) {
-            final Class<?> type = parameterTypes[i];
-            final Annotation[] annotations = parameterAnnotations[i];
-            if (containsUnresolved(annotations))
-                continue;
-            final ArgumentFactory factory = argumentFactories.get(type);
-            if (factory == null) {
-                Console.severe("No argument registered fot type %s", type);
-                return null;
-            }
-            final Argument<?> argument = factory.create();
+            final Argument<?> argument = getResolved(parameterTypes[i], parameterAnnotations[i]);
             arguments.add(argument);
         }
         return new SuperArgument(arguments);
+    }
+
+    private static  @Nullable Argument<?> getResolved(Class<?> parameter, Annotation[] annotations) {
+        if (containsUnresolved(annotations))
+            return null;
+        final ArgumentFactory factory = argumentFactories.get(parameter);
+        if (factory == null) {
+            Console.severe("No argument registered fot type %s", parameter);
+            return null;
+        }
+        return factory.create();
+    }
+
+    /**
+     * gets all arguments ignoring contextual args and unresolved args
+     * @param parameterTypes the types that belong to the arguments
+     * @param parameterAnnotations The annotations present at these types
+     * @return The arguments
+     */
+    public static Argument<?>[] getActualArgs(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
+        final List<Argument<?>> arguments = new ArrayList<>();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            final Argument<?> arg = getResolved(parameterTypes[i], parameterAnnotations[i]);
+            if (arg != null && !(arg instanceof ContextualArgument<?>))
+                arguments.add(arg);
+        }
+        return arguments.toArray(new Argument<?>[0]);
     }
 
     private static class SuperArgument extends AbstractHighLevelArg<Object> {

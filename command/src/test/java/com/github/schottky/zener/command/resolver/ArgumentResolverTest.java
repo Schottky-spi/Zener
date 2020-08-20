@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class ArgumentResolverTest {
 
     @Test
-    public void the_argument_resolver_resolves_varargs_arguments() throws ArgumentNotResolvable {
+    public void the_argument_resolver_resolves_varargs_arguments() throws CommandException {
         final Argument<?> argument = new Arguments.ItemStackArgument();
         ArgumentResolver resolver = new ArgumentResolver(new String[]{"ROTTEN_FLESH", "2"});
         resolver.resolve(argument, null);

@@ -3,10 +3,13 @@ package com.github.schottky.zener.command;
 import com.github.schottky.zener.command.resolver.ArgumentResolver;
 import com.github.schottky.zener.command.resolver.CommandException;
 import com.github.schottky.zener.command.resolver.SuccessMessage;
+import com.github.schottky.zener.command.resolver.argument.Argument;
 import com.github.schottky.zener.command.resolver.argument.HighLevelArg;
 import com.github.schottky.zener.command.resolver.argument.LowLevelArg;
 import com.github.schottky.zener.messaging.Console;
 import com.google.common.base.Preconditions;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apiguardian.api.API;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -91,6 +94,19 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         return true;
     }
 
+    @Override
+    public ComponentBuilder createCommandSyntax(String rootLabel, String[] labels) {
+        final ComponentBuilder builder = super.createCommandSyntax(rootLabel, labels);
+        if (subCommands.isEmpty()) {
+            for (Argument<?> argument : ArgumentResolver.getActualArgs(parameterTypes, parameterAnnotations)) {
+                if (argument.description() != null)
+                    builder.append(" " + argument.description()).color(ChatColor.AQUA);
+            }
+        } else {
+            builder.append(" " + name());
+        }
+        return builder.color(ChatColor.AQUA);
+    }
 
     @Override
     public @NotNull List<String> onTabComplete(

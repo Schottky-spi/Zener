@@ -2,8 +2,6 @@ package com.github.schottky.zener.command;
 
 import com.github.schottky.zener.localization.Language;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;
@@ -73,11 +71,15 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             sender.sendMessage(Language.current().translate("command.permission_denied"));
             return true;
         }
+
         CommandBase base = findSubCommand(arguments);
         String[] newArgs = ArrayUtil.popFirstN(arguments, base.computeDepth());
-        if (newArgs.length == 0 && !subCommands.isEmpty()) {
-
+        if (newArgs.length == 0 && !base.subCommands.isEmpty()) {
+            for (SubCommand<?> subCommand: base.subCommands)
+                sender.spigot().sendMessage(subCommand.createDescription(label, arguments).create());
+            return true;
         }
+
         if (newArgs.length < base.minArgsLength) {
             sender.sendMessage(base.tooFewArgumentsMessage(base.minArgsLength - newArgs.length));
             return true;
@@ -93,19 +95,16 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return depth == 0 ? originalLabel : args[depth - 1];
     }
 
-    private BaseComponent[] createNiceDescription(SubCommand<?> subCommand) {
-        final BaseComponent[] command = new ComponentBuilder()
-                .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + this.name() + subCommand.name()))
-                .append("/turnstile ")
-                .color(ChatColor.AQUA)
-                .append(subCommand.name())
-                .create();
+    public ComponentBuilder createDescription(String rootLabel, String[] labels) {
         return new ComponentBuilder()
-                .append(command)
-                .reset()
-                .append(" - ")
-                .append(subCommand.simpleDescription())
-                .create();
+                .append("/")
+                .color(ChatColor.GRAY)
+                .append(rootLabel)
+                .color(ChatColor.AQUA);
+    }
+
+    public CommandBase root() {
+        return this;
     }
 
     /**
@@ -227,7 +226,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
     // ------- SUB-COMMANDS -------
 
     /**A list of sub-commands to this command*/
-    protected final Set<SubCommand<?>> subCommands = new HashSet<>();
+    protected final Set<SubCommand<?>> subCommands = new TreeSet<>(Comparator.comparing(CommandBase::name));
 
     /**
      * finds the last sub-command that can be matched with the given String-input.
@@ -256,7 +255,11 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
      * @return The number of parents this command has. Since this is the base-class, this will return 0
      */
 
-    int computeDepth() { return 0; }
+    public int computeDepth() { return 0; }
+
+    public List<CommandBase> path() {
+        return Collections.singletonList(this);
+    }
 
     /**
      * injects the {@link Cmd}-Annotation into this command
@@ -347,8 +350,6 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
 
     @Override
     public String toString() {
-        return "CommandBase{" +
-                "name='" + name + '\'' +
-                '}';
+        return "/" + name();
     }
 }

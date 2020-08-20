@@ -2,8 +2,10 @@ package com.github.schottky.zener.command.resolver.argument;
 
 import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.CommandException;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Deque;
+import java.util.StringJoiner;
 
 public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
 
@@ -38,5 +40,29 @@ public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
             }
         }
         return null;
+    }
+
+    @Override
+    public @Nullable String description() {
+        StringJoiner joiner = new StringJoiner(" ");
+        for (Argument<?> argument: contents) {
+            if(argument.description() == null)
+                return null;
+            else
+                joiner.add(argument.description());
+        }
+        return joiner.toString();
+    }
+
+    private boolean optional;
+
+    public AbstractHighLevelArg<T> setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    @Override
+    public boolean isOptionalArgument() {
+        return optional;
     }
 }
