@@ -44,7 +44,9 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         this.name = name;
         this.permission = new Permission(permission, subCmd.permDefault());
         this.aliases.addAll(Arrays.asList(subCmd.aliases()));
-        this.simpleDescription = subCmd.desc();
+        this.shortDescription = subCmd.desc().isEmpty() ?
+                "command." + LanguageInterface.generateTranslationKey(path()) + ".short_description" :
+                subCmd.desc();
         this.maxArgsLength = Integer.MAX_VALUE;
         this.parameters = Parameter.fromMethod(method);
 

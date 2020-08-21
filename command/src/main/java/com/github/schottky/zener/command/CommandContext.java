@@ -6,6 +6,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * represents the context under which a command was invoked / tab-completion was done.
+ * This contains all relevant information that is provided using
+ * {@link org.bukkit.command.CommandExecutor#onCommand(CommandSender, Command, String, String[]) onCommand}.
+ * Additionally, this provides utility-methods to get a player or console from the context.
+ */
 public class CommandContext {
 
     public CommandContext(CommandSender sender, Command command, String label, String[] rawArgs) {

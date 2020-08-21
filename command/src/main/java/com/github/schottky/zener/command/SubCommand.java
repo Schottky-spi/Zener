@@ -16,7 +16,11 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
 
     public SubCommand(T parentCommand) {
         this.parentCommand = parentCommand;
+        scanForSubCommands();
     }
+
+    @Override
+    void initialize() { }
 
     /**
      * returns the amount of parent-commands this class has.
@@ -64,6 +68,7 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
     public ComponentBuilder createDescription(String rootLabel, CommandContext context) {
         final ComponentBuilder builder = createCommandSyntax(rootLabel, context);
 
+        final String simpleDescription = shortDescription();
         if (simpleDescription != null && !simpleDescription.isEmpty())
             builder.append(" - ").color(ChatColor.WHITE).append(simpleDescription).color(ChatColor.YELLOW);
 

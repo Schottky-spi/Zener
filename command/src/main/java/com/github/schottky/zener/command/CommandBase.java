@@ -43,6 +43,10 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         if (this.getClass().isAnnotationPresent(Cmd.class)) {
             injectCmdAnnotation();
         }
+        initialize();
+    }
+
+    void initialize() {
         scanForSubCommands();
     }
 
@@ -281,10 +285,10 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         for (String alias: cmd.aliases()) {
             aliases.add(alias.toLowerCase());
         }
-        this.simpleDescription = cmd.desc();
+        this.shortDescription = cmd.desc();
     }
 
-    private void scanForSubCommands() {
+    protected void scanForSubCommands() {
         for (final Method method: this.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(SubCmd.class)) {
                 MethodBasedSubCommand<?> methodBasedSubCommand = new MethodBasedSubCommand<>(method, this);
@@ -316,12 +320,12 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return name;
     }
 
-    protected String simpleDescription;
+    protected String shortDescription;
 
-    public String simpleDescription() {
-        return Language.isValidIdentifier(simpleDescription) ?
-                Language.current().translate(simpleDescription) :
-                simpleDescription;
+    public String shortDescription() {
+        return Language.current().hasMappingFor(shortDescription) ?
+                Language.current().translate(shortDescription) :
+                null;
     }
 
     /**
