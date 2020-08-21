@@ -9,44 +9,41 @@ import org.jetbrains.annotations.Nullable;
  * base class for an argument that is resolved solely based on it's context
  * @param <T> The value to be resolved
  */
-public abstract class AbstractContextualArgument<T> implements ContextualArgument<T> {
+public abstract class AbstractContextualArgument<T> extends AbstractArgument<T> implements ContextualArgument<T> {
 
     /**
      * creates a new argument with the provided value.
      * This should be used in {@link VarArgsArgument VarArgs-Argument}s, where
-     *
+     * @param context The context that this argument is being used in
      * @param initialValue The initial argument to pass
      */
 
-    public AbstractContextualArgument(T initialValue) {
+    public AbstractContextualArgument(CommandContext context, T initialValue) {
+        super(context);
         this.value = initialValue;
     }
 
-    public AbstractContextualArgument() {}
+    public AbstractContextualArgument(CommandContext context) {
+        super(context);
+    }
 
     private T value;
 
     /**
      * resolves and returns a value based on the context
-     * @param context The context to resolve from
      * @return The value that was resolved
      * @throws ArgumentNotResolvable When the value cannot be resolved
      */
-    public abstract T fromContext(CommandContext context) throws CommandException;
+    public abstract T fromContext() throws ArgumentNotResolvable;
 
     @Override
-    public void resolve(CommandContext context) throws CommandException {
-        this.value = fromContext(context);
+    public void resolve() throws CommandException {
+        this.value = fromContext();
     }
 
     @Override
     public T value() {
         return value;
-    }
-
-    @Override
-    public boolean isOptionalArgument() {
-        return false;
     }
 
     @Override

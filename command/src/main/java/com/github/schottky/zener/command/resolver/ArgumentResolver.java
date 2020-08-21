@@ -10,13 +10,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ArgumentResolver {
 
@@ -42,38 +39,41 @@ public class ArgumentResolver {
 
     @FunctionalInterface
     public interface ArgumentFactory {
-        Argument<?> create();
+
+        @NotNull Argument<?> create(@Nullable CommandContext context);
+
     }
 
     private final String[] args;
+    private final CommandContext context;
     private int cursor = 0;
 
-    public ArgumentResolver(String[] args) {
+    public ArgumentResolver(String @NotNull [] args, @NotNull CommandContext context) {
         this.args = args;
+        this.context = context;
     }
 
-    public Object[] resolve(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, CommandContext context) throws CommandException {
+    public @Nullable Object[] resolve(Parameter @NotNull [] parameterTypes) throws CommandException {
         final Object[] parameters = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-            final Class<?> type = parameterTypes[i];
-            final Annotation[] annotations = parameterAnnotations[i];
-            if (containsUnresolved(annotations)) {
-                parameters[i] = getUnresolvedFromContext(type, context);
+            final Parameter parameterType = parameterTypes[i];
+            if (parameterType.isAnnotationPresent(Unresolved.class)) {
+                parameters[i] = getUnresolvedFromContext(parameterType.type);
             } else {
-                final ArgumentFactory factory = argumentFactories.get(type);
+                final ArgumentFactory factory = argumentFactories.get(parameterType.type);
                 if (factory == null) {
-                    Console.severe("No argument registered fot type %s", type);
+                    Console.severe("No argument registered fot type %s", parameterType.type);
                     return null;
                 }
-                final Argument<?> argument = factory.create();
-                resolve(argument, context);
-                parameters[i] = argument.value(context);
+                final Argument<?> argument = factory.create(context);
+                resolve(argument);
+                parameters[i] = argument.value();
             }
         }
         return parameters;
     }
 
-    private Object getUnresolvedFromContext(Class<?> clazz, CommandContext context) throws CommandException {
+    private Object getUnresolvedFromContext(Class<?> clazz) throws CommandException {
         if (clazz.isAssignableFrom(Player.class)) {
             return context.getPlayer();
         } else if (clazz.isAssignableFrom(ConsoleCommandSender.class)) {
@@ -88,86 +88,79 @@ public class ArgumentResolver {
         throw new UnsupportedOperationException("Type " + clazz + " cannot be injected unresolved");
     }
 
-    private static boolean containsUnresolved(Annotation[] annotations) {
-        for (Annotation annotation : annotations) {
-            if (annotation instanceof Unresolved) return true;
-        }
-        return false;
-    }
-
-    public void resolve(Argument<?> argument, CommandContext context) throws CommandException {
-        Argument<?> arg = resolveAndReturnLast(argument, context);
+    public void resolve(@NotNull Argument<?> argument) throws CommandException {
+        Argument<?> arg = resolveAndReturnLast(argument);
         if (arg != null) throw ArgumentNotResolvable.withMessage("Too few args!");
     }
 
-    public Argument<?> resolveAndReturnLast(Argument<?> argument, CommandContext context) throws CommandException {
+    public @Nullable Argument<?> resolveAndReturnLast(@NotNull Argument<?> argument) throws CommandException {
         if (argument instanceof VarArgsArgument<?>) {
             VarArgsArgument<?> arg = (VarArgsArgument<?>) argument;
             if (args.length - cursor < arg.minArgs()) throw ArgumentNotResolvable.withMessage("Too few args");
             if (args.length - cursor > arg.maxArgs()) throw ArgumentNotResolvable.withMessage("Too many args");
-            final Argument<?>[] content = arg.contents(context);
+            final Argument<?>[] content = arg.contents();
             final int rest = args.length - cursor;
             for (int i = 0; i < rest; i++) {
-                resolve(content[i], context);
+                resolve(content[i]);
             }
         } else if (argument instanceof HighLevelArg) {
             HighLevelArg<?> arg = (HighLevelArg<?>) argument;
-            final Argument<?>[] contents = arg.contents(context);
+            final Argument<?>[] contents = arg.contents();
             for (Argument<?> content: contents) {
-                resolve(content, context);
+                resolve(content);
             }
         } else if (argument instanceof LowLevelArg) {
             LowLevelArg<?> arg = (LowLevelArg<?>) argument;
             if (args.length == cursor) return arg;
-            arg.resolve(args[cursor], context);
+            arg.resolve(args[cursor]);
             cursor++;
         } else if (argument instanceof ContextualArgument<?>) {
             ContextualArgument<?> arg = (ContextualArgument<?>) argument;
-            arg.resolve(context);
+            arg.resolve();
         }
         return null;
     }
 
-    public HighLevelArg<?> computeRoot(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
+    public HighLevelArg<?> computeRoot(Parameter[] parameterTypes) {
         final List<Argument<?>> arguments = new ArrayList<>();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            final Argument<?> argument = getResolved(parameterTypes[i], parameterAnnotations[i]);
-            arguments.add(argument);
+        for (Parameter parameter : parameterTypes) {
+            getResolvedOnly(parameter, context)
+                    .ifPresent(arguments::add);
         }
-        return new SuperArgument(arguments);
+        return new SuperArgument(context, arguments);
     }
 
-    private static  @Nullable Argument<?> getResolved(Class<?> parameter, Annotation[] annotations) {
-        if (containsUnresolved(annotations))
-            return null;
-        final ArgumentFactory factory = argumentFactories.get(parameter);
-        if (factory == null) {
-            Console.severe("No argument registered fot type %s", parameter);
-            return null;
-        }
-        return factory.create();
+    private static Optional<Argument<?>> getResolvedOnly(Parameter parameterType, CommandContext context) {
+        if (parameterType.isAnnotationPresent(Unresolved.class))
+            return Optional.empty();
+        else
+            return Optional.ofNullable(argumentFactories.get(parameterType.type))
+                .map(factory -> factory.create(context));
     }
 
-    /**
-     * gets all arguments ignoring contextual args and unresolved args
-     * @param parameterTypes the types that belong to the arguments
-     * @param parameterAnnotations The annotations present at these types
-     * @return The arguments
-     */
-    public static Argument<?>[] getActualArgs(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
-        final List<Argument<?>> arguments = new ArrayList<>();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            final Argument<?> arg = getResolved(parameterTypes[i], parameterAnnotations[i]);
-            if (arg != null && !(arg instanceof ContextualArgument<?>))
-                arguments.add(arg);
+    public static List<String> getCommandArguments(Parameter[] parameterTypes, CommandContext context) {
+        final List<String> arguments = new ArrayList<>();
+        for (Parameter parameterType: parameterTypes) {
+            getResolvedOnly(parameterType, context)
+                    .filter(argument -> !(argument instanceof ContextualArgument<?>))
+                    .map(arg -> {
+                        try {
+                            return parameterType.getAnnotation(Describe.class)
+                                    .map(anno -> "<" + anno.value() + ">")
+                                    .orElse(arg.description());
+                        } catch (CommandException ignored) {
+                            return null;
+                        }
+                    })
+                    .ifPresent(arguments::add);
         }
-        return arguments.toArray(new Argument<?>[0]);
+        return arguments;
     }
 
     private static class SuperArgument extends AbstractHighLevelArg<Object> {
 
-        public SuperArgument(List<Argument<?>> allArgs) {
-            super(allArgs.toArray(new Argument<?>[0]));
+        public SuperArgument(CommandContext context, List<Argument<?>> allArgs) {
+            super(context, allArgs.toArray(new Argument<?>[0]));
         }
 
         @Override

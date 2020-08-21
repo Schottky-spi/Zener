@@ -23,12 +23,16 @@ public class Arguments {
 
     public static class IntArgument extends AbstractLowLevelArg<Integer> {
 
-        public IntArgument(int initialValue) { super(initialValue); }
+        public IntArgument(CommandContext context, int initialValue) {
+            super(context, initialValue);
+        }
 
-        public IntArgument() { super(); }
+        public IntArgument(CommandContext context) {
+            super(context);
+        }
 
         @Override
-        protected Integer fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        protected Integer fromArgument(String arg) throws ArgumentNotResolvable {
             try {
                 return Integer.parseInt(arg);
             } catch (NumberFormatException e) {
@@ -43,12 +47,16 @@ public class Arguments {
 
     public static class DoubleArgument extends AbstractLowLevelArg<Double> {
 
-        public DoubleArgument(double initialValue) { super(initialValue); }
+        public DoubleArgument(CommandContext context, double initialValue) {
+            super(context, initialValue);
+        }
 
-        public DoubleArgument() { super(); }
+        public DoubleArgument(CommandContext context) {
+            super(context);
+        }
 
         @Override
-        protected Double fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        protected Double fromArgument(String arg) throws ArgumentNotResolvable {
             try {
                 return Double.parseDouble(arg);
             } catch (NumberFormatException e) {
@@ -64,12 +72,16 @@ public class Arguments {
 
     public static class StringArgument extends AbstractLowLevelArg<String> {
 
-        public StringArgument(String initialValue) { super(initialValue); }
+        public StringArgument(CommandContext context, String initialValue) {
+            super(context, initialValue);
+        }
 
-        public StringArgument() { super(); }
+        public StringArgument(CommandContext context) {
+            super(context);
+        }
 
         @Override
-        protected String fromArgument(String arg, CommandContext context) {
+        protected String fromArgument(String arg) {
             return arg;
         }
     }
@@ -80,12 +92,16 @@ public class Arguments {
 
     public static class BooleanArgument extends AbstractLowLevelArg<Boolean> {
 
-        public BooleanArgument(boolean initialValue) { super(initialValue); }
+        public BooleanArgument(CommandContext context, boolean initialValue) {
+            super(context, initialValue);
+        }
 
-        public BooleanArgument() { super(); }
+        public BooleanArgument(CommandContext context) {
+            super(context);
+        }
 
         @Override
-        protected Boolean fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        public Boolean fromArgument(String arg) throws ArgumentNotResolvable {
             if (arg.equalsIgnoreCase("true"))
                 return true;
             else if (arg.equalsIgnoreCase("false"))
@@ -102,15 +118,18 @@ public class Arguments {
 
     public static class MaterialArgument extends AbstractLowLevelArg<Material> {
 
-        public MaterialArgument(Material initialValue) {
-            super(initialValue);
+        public MaterialArgument(CommandContext context, Material initialValue) {
+            super(context, initialValue);
             this.description = "type";
         }
 
-        public MaterialArgument() { this.description = "type"; }
+        public MaterialArgument(CommandContext context) {
+            super(context);
+            this.description = "type";
+        }
 
         @Override
-        protected Material fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        protected Material fromArgument(String arg) throws ArgumentNotResolvable {
             Material material = Material.matchMaterial(arg);
             if (material == null) {
                 throw ArgumentNotResolvable.withMessage("No material with name " + arg + " found");
@@ -123,7 +142,7 @@ public class Arguments {
         private static final Material[] materials = Material.values();
 
         @Override
-        public Stream<Material> options(CommandContext context) {
+        public Stream<Material> options() {
             return Arrays.stream(materials);
         }
 
@@ -140,17 +159,18 @@ public class Arguments {
 
     public static class OfflinePlayerArg extends AbstractLowLevelArg<OfflinePlayer> {
 
-        public OfflinePlayerArg(OfflinePlayer initialValue) {
-            super(initialValue);
+        public OfflinePlayerArg(CommandContext context, OfflinePlayer initialValue) {
+            super(context, initialValue);
             this.description = "player";
         }
 
-        public OfflinePlayerArg() {
+        public OfflinePlayerArg(CommandContext context) {
+            super(context);
             this.description = "player";
         }
 
         @Override
-        protected OfflinePlayer fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        protected OfflinePlayer fromArgument(String arg) throws ArgumentNotResolvable {
             OfflinePlayer player = Bukkit.getOfflinePlayer(arg);
             if (!player.hasPlayedBefore())
                 throw ArgumentNotResolvable.withMessage("Offline-player not found");
@@ -159,7 +179,7 @@ public class Arguments {
         }
 
         @Override
-        public Stream<OfflinePlayer> options(CommandContext context) {
+        public Stream<OfflinePlayer> options() {
             return Bukkit.getOnlinePlayers().stream().map(p -> (OfflinePlayer) p);
         }
 
@@ -175,17 +195,18 @@ public class Arguments {
 
     public static class PlayerArg extends AbstractLowLevelArg<Player> {
 
-        public PlayerArg(Player initialValue) {
-            super(initialValue);
+        public PlayerArg(CommandContext context, Player initialValue) {
+            super(context, initialValue);
             this.description = "player";
         }
 
-        public PlayerArg() {
+        public PlayerArg(CommandContext context) {
+            super(context);
             this.description = "player";
         }
 
         @Override
-        protected Player fromArgument(String arg, CommandContext context) throws ArgumentNotResolvable {
+        protected Player fromArgument(String arg) throws ArgumentNotResolvable {
             Player player = Bukkit.getPlayer(arg);
             if (player == null)
                 throw ArgumentNotResolvable.withMessage("Player " + arg + " not found");
@@ -194,7 +215,7 @@ public class Arguments {
         }
 
         @Override
-        public Stream<Player> options(CommandContext context) {
+        public Stream<Player> options() {
             return Bukkit.getOnlinePlayers().stream().map(p -> (Player) p);
         }
 
@@ -213,9 +234,11 @@ public class Arguments {
 
     public static class ItemStackArgument extends AbstractHighLevelVarArg<ItemStack> {
 
-        public ItemStackArgument() {
-            super(new MaterialArgument().withDescription("type"),
-                    new IntArgument(1)
+        public ItemStackArgument(CommandContext context) {
+            super(context,
+                    new MaterialArgument(context)
+                            .withDescription("type"),
+                    new IntArgument(context, 1)
                             .withOptions(Stream.of(1, 32, 64))
                             .withDescription("amount", true));
         }

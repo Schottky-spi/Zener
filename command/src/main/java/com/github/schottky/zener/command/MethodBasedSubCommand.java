@@ -2,8 +2,8 @@ package com.github.schottky.zener.command;
 
 import com.github.schottky.zener.command.resolver.ArgumentResolver;
 import com.github.schottky.zener.command.resolver.CommandException;
+import com.github.schottky.zener.command.resolver.Parameter;
 import com.github.schottky.zener.command.resolver.SuccessMessage;
-import com.github.schottky.zener.command.resolver.argument.Argument;
 import com.github.schottky.zener.command.resolver.argument.HighLevelArg;
 import com.github.schottky.zener.command.resolver.argument.LowLevelArg;
 import com.github.schottky.zener.messaging.Console;
@@ -16,7 +16,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -47,15 +46,13 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         this.aliases.addAll(Arrays.asList(subCmd.aliases()));
         this.simpleDescription = subCmd.desc();
         this.maxArgsLength = Integer.MAX_VALUE;
-        this.parameterTypes = method.getParameterTypes();
-        this.parameterAnnotations = method.getParameterAnnotations();
+        this.parameters = Parameter.fromMethod(method);
 
         if (method.isAnnotationPresent(SuccessMessage.class))
             successMessage = method.getAnnotation(SuccessMessage.class).value();
     }
 
-    private final Class<?>[] parameterTypes;
-    private final Annotation[][] parameterAnnotations;
+    private final Parameter[] parameters;
 
     @Override
     public boolean onAcceptedCommand(
@@ -67,7 +64,7 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
         final CommandContext context = new CommandContext(sender, command, label, args);
         Object[] resolved;
         try {
-            resolved = new ArgumentResolver(args).resolve(parameterTypes, parameterAnnotations, context);
+            resolved = new ArgumentResolver(args, context).resolve(parameters);
             if (resolved == null)
                 return true;
         } catch (CommandException exception) {
@@ -91,17 +88,16 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
 
         if (successMessage != null)
             context.getSender().sendMessage(successMessage);
+
         return true;
     }
 
     @Override
-    public ComponentBuilder createCommandSyntax(String rootLabel, String[] labels) {
-        final ComponentBuilder builder = super.createCommandSyntax(rootLabel, labels);
+    public ComponentBuilder createCommandSyntax(String rootLabel, CommandContext context) {
+        final ComponentBuilder builder = super.createCommandSyntax(rootLabel, context);
         if (subCommands.isEmpty()) {
-            for (Argument<?> argument : ArgumentResolver.getActualArgs(parameterTypes, parameterAnnotations)) {
-                if (argument.description() != null)
-                    builder.append(" " + argument.description()).color(ChatColor.AQUA);
-            }
+            for (String arg: ArgumentResolver.getCommandArguments(parameters, context))
+                builder.append(" ").append(arg).color(ChatColor.AQUA);
         } else {
             builder.append(" " + name());
         }
@@ -116,13 +112,13 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
             @NotNull String[] args)
     {
         final CommandContext context = new CommandContext(sender, command, label, args);
-        final HighLevelArg<?> superArg = new ArgumentResolver(args).computeRoot(parameterTypes, parameterAnnotations);
+        final HighLevelArg<?> superArg = new ArgumentResolver(args, context).computeRoot(parameters);
         final LowLevelArg<?> arg = superArg.findLastArgument(new LinkedList<>(Arrays.asList(args)), context);
         if (arg == null)
             return Collections.emptyList();
         else {
             try {
-                return arg.optionsAsString(context)
+                return arg.optionsAsString()
                         .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
                         .collect(Collectors.toList());
             } catch (CommandException e) {

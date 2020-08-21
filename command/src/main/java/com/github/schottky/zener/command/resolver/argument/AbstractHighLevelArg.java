@@ -7,21 +7,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Deque;
 import java.util.StringJoiner;
 
-public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
+public abstract class AbstractHighLevelArg<T> extends AbstractArgument<T> implements HighLevelArg<T> {
 
     protected final Argument<?>[] contents;
 
-    public AbstractHighLevelArg(Argument<?>... contents) {
+    public AbstractHighLevelArg(CommandContext context, Argument<?>... contents) {
+        super(context);
         this.contents = contents;
     }
 
     @Override
-    public Argument<?>[] contents(CommandContext context) {
+    public Argument<?>[] contents() {
         return contents;
     }
 
     public LowLevelArg<?> findLastArgument(Deque<String> arguments, CommandContext context) {
-        for (Argument<?> arg: contents(context)) {
+        for (Argument<?> arg: contents()) {
             if (arg instanceof HighLevelArg<?>) {
                 return ((HighLevelArg<?>) arg).findLastArgument(arguments, context);
             } else if (arg instanceof LowLevelArg<?>) {
@@ -32,7 +33,7 @@ public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
                     return lowLevelArg;
                 else {
                     try {
-                        lowLevelArg.resolve(arguments.pop(), context);
+                        lowLevelArg.resolve(arguments.pop());
                     } catch (CommandException notResolvable) {
                         return null;
                     }
@@ -52,17 +53,5 @@ public abstract class AbstractHighLevelArg<T> implements HighLevelArg<T> {
                 joiner.add(argument.description());
         }
         return joiner.toString();
-    }
-
-    private boolean optional;
-
-    public AbstractHighLevelArg<T> setOptional(boolean optional) {
-        this.optional = optional;
-        return this;
-    }
-
-    @Override
-    public boolean isOptionalArgument() {
-        return optional;
     }
 }

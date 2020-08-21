@@ -75,8 +75,9 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         CommandBase base = findSubCommand(arguments);
         String[] newArgs = ArrayUtil.popFirstN(arguments, base.computeDepth());
         if (newArgs.length == 0 && !base.subCommands.isEmpty()) {
+            final CommandContext context = new CommandContext(sender, command, label, arguments);
             for (SubCommand<?> subCommand: base.subCommands)
-                sender.spigot().sendMessage(subCommand.createDescription(label, arguments).create());
+                sender.spigot().sendMessage(subCommand.createDescription(label, context).create());
             return true;
         }
 
@@ -95,7 +96,7 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return depth == 0 ? originalLabel : args[depth - 1];
     }
 
-    public ComponentBuilder createDescription(String rootLabel, String[] labels) {
+    public ComponentBuilder createDescription(String rootLabel, CommandContext context) {
         return new ComponentBuilder()
                 .append("/")
                 .color(ChatColor.GRAY)

@@ -1,37 +1,27 @@
 package com.github.schottky.zener.command.resolver.argument;
 
-import com.github.schottky.zener.command.CommandContext;
-import com.github.schottky.zener.command.resolver.CommandException;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * represents an Argument
+ * @param <T> The type that this argument represents
+ */
 public interface Argument<T> {
 
     @Nullable String description();
 
-    boolean isOptionalArgument();
-
     T value();
 
-    default T value(CommandContext context) throws CommandException {
-        return value();
-    }
-
     default int asInt() {
-        if (value() instanceof Integer)
-            return (Integer) value();
-        throw new ClassCastException();
+        return as(Integer.class);
     }
 
     default double asDouble() {
-        if (value() instanceof Double)
-            return (Double) value();
-        throw new ClassCastException();
+        return as(Double.class);
     }
 
     default boolean asBoolean() {
-        if (value() instanceof Boolean)
-            return (Boolean) value();
-        throw new ClassCastException();
+        return as(Boolean.class);
     }
 
     default <V> V as(Class<V> vClass) {

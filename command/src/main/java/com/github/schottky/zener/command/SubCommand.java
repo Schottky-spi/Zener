@@ -61,8 +61,8 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
     }
 
     @Override
-    public ComponentBuilder createDescription(String rootLabel, String[] labels) {
-        final ComponentBuilder builder = createCommandSyntax(rootLabel, labels);
+    public ComponentBuilder createDescription(String rootLabel, CommandContext context) {
+        final ComponentBuilder builder = createCommandSyntax(rootLabel, context);
 
         if (simpleDescription != null && !simpleDescription.isEmpty())
             builder.append(" - ").color(ChatColor.WHITE).append(simpleDescription).color(ChatColor.YELLOW);
@@ -70,18 +70,19 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
         return builder;
     }
 
-    public ComponentBuilder createCommandSyntax(String rootLabel, String[] labels) {
+    public ComponentBuilder createCommandSyntax(String rootLabel, CommandContext context) {
         final ComponentBuilder builder = new ComponentBuilder()
-                .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, Joiner.on(' ').join(labels)))
+                .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                        "/" + rootLabel + Joiner.on(' ').join(context.getRawArgs()) + " " + name()))
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new BaseComponent[] { new TextComponent(name()) }))
                 .append("/").color(ChatColor.GRAY).append(rootLabel).color(ChatColor.AQUA);
 
-        for (String label : labels) {
-            builder.append(" " + label).color(ChatColor.AQUA);
+        for (String label : context.getRawArgs()) {
+            builder.append(" ").append(label).color(ChatColor.AQUA);
         }
 
-        return builder.append(" " + name()).color(ChatColor.AQUA);
+        return builder.append(" ").append(name()).color(ChatColor.AQUA);
     }
 
     @Override

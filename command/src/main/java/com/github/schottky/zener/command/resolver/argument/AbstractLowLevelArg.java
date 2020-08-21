@@ -5,36 +5,31 @@ import com.github.schottky.zener.command.resolver.CommandException;
 import com.github.schottky.zener.localization.Language;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
+public abstract class AbstractLowLevelArg<T> extends AbstractArgument<T> implements LowLevelArg<T> {
 
-    public AbstractLowLevelArg(T initialValue) {
+    public AbstractLowLevelArg(CommandContext context, T initialValue) {
+        super(context);
         this.value = initialValue;
     }
 
-    public AbstractLowLevelArg() { }
-
-    private T value;
-
-    @Override
-    public void resolve(String arg, CommandContext context) throws CommandException {
-        this.value = fromArgument(arg, context);
+    public AbstractLowLevelArg(CommandContext context) {
+        super(context);
     }
 
-    protected abstract T fromArgument(String arg, CommandContext context) throws CommandException;
+    private Stream<T> options = Stream.empty();
 
     @Override
-    public T value() {
-        return value;
+    public Stream<T> options() throws CommandException {
+        checkPermission();
+        return options;
     }
 
-    private Function<CommandContext, Stream<T>> optionsSupplier = context -> Stream.empty();
-
     @Override
-    public Stream<T> options(CommandContext context) throws CommandException {
-        return optionsSupplier.apply(context);
+    public Stream<String> optionsAsString() {
+        checkPermission();
+        return options.map(this::toString);
     }
 
     @Override
@@ -43,21 +38,32 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
     }
 
     public AbstractLowLevelArg<T> withOptions(Stream<T> options) {
-        this.optionsSupplier = (context) -> options;
+        this.options = options;
         return this;
     }
 
-    public AbstractLowLevelArg<T> withOptions(Function<CommandContext,Stream<T>> optionsSupplier) {
-        this.optionsSupplier = optionsSupplier;
-        return this;
+    private T value;
+
+    @Override
+    public T value() {
+        return value;
     }
+
+    @Override
+    public void resolve(String arg) {
+        checkPermission();
+        this.value = fromArgument(arg);
+    }
+
+    protected abstract T fromArgument(String arg);
 
     protected String description;
 
     @Override
     public @Nullable String description() {
         if (description == null) return null;
-        else return optionalArg ? "[" + description + "]" : "<" + description + ">";
+        checkPermission();
+        return optionalArg ? "[" + description + "]" : "<" + description + ">";
     }
 
     public AbstractLowLevelArg<T> withDescription(String description, boolean optional) {
@@ -73,15 +79,23 @@ public abstract class AbstractLowLevelArg<T> implements LowLevelArg<T> {
         return this;
     }
 
+    private boolean optionalArg = false;
+
     public AbstractLowLevelArg<T> setOptional(boolean optionalArg) {
         this.optionalArg = optionalArg;
         return this;
     }
 
-    private boolean optionalArg = false;
+    private String permission;
 
-    @Override
-    public boolean isOptionalArgument() {
-        return optionalArg;
+    public AbstractLowLevelArg<T> requirePermission(String permission) {
+        this.permission = permission;
+        return this;
     }
+
+    private void checkPermission() {
+        if (permission != null && !context.getSender().hasPermission(permission))
+            throw new CommandException("You do not have permission");
+    }
+
 }

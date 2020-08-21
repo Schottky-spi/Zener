@@ -1,24 +1,118 @@
 package com.github.schottky.zener.command.resolver;
 
+import com.github.schottky.command.mock.MockPlayer;
+import com.github.schottky.zener.command.CommandContext;
+import com.github.schottky.zener.command.resolver.argument.AbstractLowLevelArg;
 import com.github.schottky.zener.command.resolver.argument.Argument;
 import com.github.schottky.zener.command.resolver.argument.Arguments;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ArgumentResolverTest {
 
+    static class CustomArgsResolver extends AbstractLowLevelArg<Byte> {
+
+        public CustomArgsResolver(CommandContext context) {
+            super(context);
+        }
+
+        @Override
+        protected Byte fromArgument(String arg) {
+            try {
+                return Byte.valueOf(arg);
+            } catch (NumberFormatException e) {
+                throw ArgumentNotResolvable.withMessage("Byte not assignable to " + arg);
+            }
+        }
+    }
+
+    private final CommandContext mockContext =
+            new CommandContext(new MockPlayer(), null, "label", new String[0]);
+
     @Test
-    public void the_argument_resolver_resolves_varargs_arguments() throws CommandException {
-        final Argument<?> argument = new Arguments.ItemStackArgument();
-        ArgumentResolver resolver = new ArgumentResolver(new String[]{"ROTTEN_FLESH", "2"});
-        resolver.resolve(argument, null);
-        final ItemStack stack = argument.as(ItemStack.class);
-        assertSame(stack.getType(), Material.ROTTEN_FLESH);
-        assertEquals(stack.getAmount(), 2);
+    public void an_empty_parameter_array_can_be_resolved() {
+        final Object[] resolved = new ArgumentResolver(new String[0], mockContext).resolve(new Parameter[0]);
+        assertEquals(0, resolved.length);
+    }
+
+    @Test
+    public void an_existing_argument_can_be_resolved() {
+        final Parameter[] types = new Parameter[] { new Parameter(String.class) };
+        final Object[] resolved = new ArgumentResolver(new String[] {"foo"}, mockContext).resolve(types);
+        assertEquals(1, resolved.length);
+        assertEquals("foo", resolved[0]);
+    }
+
+    @Test
+    public void when_an_argument_gets_registered_it_can_be_resolved() {
+        ArgumentResolver.registerArgument(Byte.class, CustomArgsResolver::new);
+        final Parameter[] types = new Parameter[] { new Parameter(Byte.class) };
+        final Object[] objects = new ArgumentResolver(new String[] {"1"}, mockContext).resolve(types);
+        assertEquals(1, objects.length);
+        assertEquals((byte) 1, objects[0]);
+    }
+
+    static class NewIntResolver extends AbstractLowLevelArg<Integer> {
+
+        public NewIntResolver(CommandContext context) {
+            super(context);
+        }
+
+        @Override
+        protected Integer fromArgument(String arg) {
+            try {
+                return Integer.parseInt(arg) + 42;
+            } catch (NumberFormatException e) {
+                throw ArgumentNotResolvable.withMessage("Int not assignable to " + arg);
+            }
+        }
+    }
+
+    @Test
+    public void when_an_existing_argument_gets_registered_it_overrides_the_old_one() {
+        ArgumentResolver.registerArgument(Integer.class, NewIntResolver::new);
+        final Parameter[] types = new Parameter[] { new Parameter(Integer.class) };
+        final Object[] objects = new ArgumentResolver(new String[] {"1"}, mockContext).resolve(types);
+        assertEquals(1, objects.length);
+        assertEquals(1 + 42, objects[0]);
+    }
+
+    @Nested class The_argument_resolver_resolves_varargs_arguments {
+
+        final Argument<ItemStack> argument = new Arguments.ItemStackArgument(mockContext);
+
+        @Test
+        public void with_min_args() {
+            new ArgumentResolver(new String[] {"ROTTEN_FLESH"}, mockContext).resolve(argument);
+            final ItemStack stack = argument.value();
+            assertSame(Material.ROTTEN_FLESH, stack.getType());
+            assertEquals(1, stack.getAmount());
+        }
+
+        @Test
+        public void with_max_args() {
+            new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2"}, mockContext).resolve(argument);
+            final ItemStack stack = argument.value();
+            assertSame(Material.ROTTEN_FLESH, stack.getType());
+            assertEquals(2, stack.getAmount());
+        }
+
+        @Test
+        public void throws_when_too_few_args_are_given() {
+            assertThrows(ArgumentNotResolvable.class, () ->
+                    new ArgumentResolver(new String[0], mockContext).resolve(argument));
+        }
+
+        @Test
+        public void throws_when_too_many_args_are_given() {
+            assertThrows(ArgumentNotResolvable.class, () ->
+                    new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2", "foo"}, mockContext).resolve(argument) );
+        }
+
     }
 
 }
