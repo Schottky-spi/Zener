@@ -78,7 +78,7 @@ public abstract class SubCommand<T extends CommandBase> extends CommandBase {
     public ComponentBuilder createCommandSyntax(String rootLabel, CommandContext context) {
         final ComponentBuilder builder = new ComponentBuilder()
                 .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                        "/" + rootLabel + Joiner.on(' ').join(context.getRawArgs()) + " " + name()))
+                        "/" + rootLabel + " " + Joiner.on(' ').join(context.getRawArgs()) + " " + name()))
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new BaseComponent[] { new TextComponent(name()) }))
                 .append("/").color(ChatColor.GRAY).append(rootLabel).color(ChatColor.AQUA);

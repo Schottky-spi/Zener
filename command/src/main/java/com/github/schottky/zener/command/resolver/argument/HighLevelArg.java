@@ -1,14 +1,22 @@
 package com.github.schottky.zener.command.resolver.argument;
 
-import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.CommandException;
-
-import java.util.Deque;
 
 public interface HighLevelArg<T> extends Argument<T> {
 
     Argument<?>[] contents() throws CommandException;
 
-    LowLevelArg<?> findLastArgument(Deque<String> arguments, CommandContext context);
-
+    @Override
+    default boolean isLowLevel()        { return false; }
+    @Override
+    default boolean isHighLevel()       { return true; }
+    @Override
+    default boolean isContextualOnly()  { return false; }
+    @Override
+    default boolean isUnresolved()      { return false; }
+    @Override
+    default boolean isVarArgsArgument() { return false; }
+    
+    @Override
+    default HighLevelArg<T> asHighLevelArg() { return this; }
 }

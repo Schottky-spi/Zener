@@ -5,12 +5,15 @@ import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.stream.Stream;
+
+import static com.github.schottky.zener.command.resolver.argument.ArgumentBuilder.integer;
+import static com.github.schottky.zener.command.resolver.argument.ArgumentBuilder.material;
 
 /**
  * A variety of possible pre-built arguments
@@ -22,10 +25,6 @@ public class Arguments {
      */
 
     public static class IntArgument extends AbstractLowLevelArg<Integer> {
-
-        public IntArgument(CommandContext context, int initialValue) {
-            super(context, initialValue);
-        }
 
         public IntArgument(CommandContext context) {
             super(context);
@@ -46,10 +45,6 @@ public class Arguments {
      */
 
     public static class DoubleArgument extends AbstractLowLevelArg<Double> {
-
-        public DoubleArgument(CommandContext context, double initialValue) {
-            super(context, initialValue);
-        }
 
         public DoubleArgument(CommandContext context) {
             super(context);
@@ -72,10 +67,6 @@ public class Arguments {
 
     public static class StringArgument extends AbstractLowLevelArg<String> {
 
-        public StringArgument(CommandContext context, String initialValue) {
-            super(context, initialValue);
-        }
-
         public StringArgument(CommandContext context) {
             super(context);
         }
@@ -91,10 +82,6 @@ public class Arguments {
      */
 
     public static class BooleanArgument extends AbstractLowLevelArg<Boolean> {
-
-        public BooleanArgument(CommandContext context, boolean initialValue) {
-            super(context, initialValue);
-        }
 
         public BooleanArgument(CommandContext context) {
             super(context);
@@ -118,14 +105,9 @@ public class Arguments {
 
     public static class MaterialArgument extends AbstractLowLevelArg<Material> {
 
-        public MaterialArgument(CommandContext context, Material initialValue) {
-            super(context, initialValue);
-            this.description = "type";
-        }
-
         public MaterialArgument(CommandContext context) {
             super(context);
-            this.description = "type";
+            this.setDescription("material", false);
         }
 
         @Override
@@ -142,13 +124,8 @@ public class Arguments {
         private static final Material[] materials = Material.values();
 
         @Override
-        public Stream<Material> options() {
-            return Arrays.stream(materials);
-        }
-
-        @Override
-        public String toString(Material value) {
-            return value.name().toLowerCase(Locale.US);
+        public Stream<String> optionsAsString() {
+            return Arrays.stream(materials).map(material -> material.name().toLowerCase());
         }
     }
 
@@ -159,14 +136,9 @@ public class Arguments {
 
     public static class OfflinePlayerArg extends AbstractLowLevelArg<OfflinePlayer> {
 
-        public OfflinePlayerArg(CommandContext context, OfflinePlayer initialValue) {
-            super(context, initialValue);
-            this.description = "player";
-        }
-
         public OfflinePlayerArg(CommandContext context) {
             super(context);
-            this.description = "player";
+            this.setDescription("player", false);
         }
 
         @Override
@@ -179,13 +151,8 @@ public class Arguments {
         }
 
         @Override
-        public Stream<OfflinePlayer> options() {
-            return Bukkit.getOnlinePlayers().stream().map(p -> (OfflinePlayer) p);
-        }
-
-        @Override
-        public String toString(OfflinePlayer player) {
-            return player.getName();
+        public Stream<String> optionsAsString() {
+            return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName);
         }
     }
 
@@ -195,14 +162,9 @@ public class Arguments {
 
     public static class PlayerArg extends AbstractLowLevelArg<Player> {
 
-        public PlayerArg(CommandContext context, Player initialValue) {
-            super(context, initialValue);
-            this.description = "player";
-        }
-
         public PlayerArg(CommandContext context) {
             super(context);
-            this.description = "player";
+            this.setDescription("player", false);
         }
 
         @Override
@@ -215,14 +177,10 @@ public class Arguments {
         }
 
         @Override
-        public Stream<Player> options() {
-            return Bukkit.getOnlinePlayers().stream().map(p -> (Player) p);
+        public Stream<String> optionsAsString() {
+            return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName);
         }
 
-        @Override
-        public String toString(Player player) {
-            return player.getName();
-        }
     }
 
     /**
@@ -236,11 +194,12 @@ public class Arguments {
 
         public ItemStackArgument(CommandContext context) {
             super(context,
-                    new MaterialArgument(context)
-                            .withDescription("type"),
-                    new IntArgument(context, 1)
-                            .withOptions(Stream.of(1, 32, 64))
-                            .withDescription("amount", true));
+                    material()
+                            .description("material"),
+                    integer()
+                            .initialValue(1)
+                            .options(1, 32, 64)
+                            .description("amount"));
         }
 
         @Override
@@ -256,6 +215,16 @@ public class Arguments {
         @Override
         public ItemStack value() {
             return new ItemStack(contents[0].as(Material.class), contents[1].asInt());
+        }
+    }
+
+    public static class ContextArgument extends AbstractContextualArgument<CommandContext> {
+
+        public ContextArgument(CommandContext context) { super(context); }
+
+        @Override
+        public CommandContext fromContext() throws ArgumentNotResolvable {
+            return context;
         }
     }
 }

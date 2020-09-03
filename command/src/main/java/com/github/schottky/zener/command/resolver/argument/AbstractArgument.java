@@ -9,4 +9,21 @@ public abstract class AbstractArgument<T> implements Argument<T> {
     }
 
     protected final CommandContext context;
+
+    @Override
+    public CommandContext context() {
+        return context;
+    }
+
+
+    protected T value;
+
+    @Override
+    public T value() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
 }

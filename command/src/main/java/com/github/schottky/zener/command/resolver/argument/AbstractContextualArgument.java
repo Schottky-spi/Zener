@@ -3,7 +3,10 @@ package com.github.schottky.zener.command.resolver.argument;
 import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.ArgumentNotResolvable;
 import com.github.schottky.zener.command.resolver.CommandException;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
+import java.util.Queue;
+import java.util.stream.Stream;
 
 /**
  * base class for an argument that is resolved solely based on it's context
@@ -15,19 +18,11 @@ public abstract class AbstractContextualArgument<T> extends AbstractArgument<T> 
      * creates a new argument with the provided value.
      * This should be used in {@link VarArgsArgument VarArgs-Argument}s, where
      * @param context The context that this argument is being used in
-     * @param initialValue The initial argument to pass
      */
-
-    public AbstractContextualArgument(CommandContext context, T initialValue) {
-        super(context);
-        this.value = initialValue;
-    }
 
     public AbstractContextualArgument(CommandContext context) {
         super(context);
     }
-
-    private T value;
 
     /**
      * resolves and returns a value based on the context
@@ -42,12 +37,18 @@ public abstract class AbstractContextualArgument<T> extends AbstractArgument<T> 
     }
 
     @Override
-    public T value() {
-        return value;
+    public boolean resolve(Queue<String> arguments) {
+        this.value = fromContext();
+        return true;
     }
 
     @Override
-    public @Nullable String description() {
-        return null;
+    public Stream<String> tabOptions(Queue<String> arguments) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Optional<String> description() {
+        return Optional.empty();
     }
 }

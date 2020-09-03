@@ -11,4 +11,34 @@ import com.github.schottky.zener.command.CommandContext;
 public interface ContextualArgument<T> extends Argument<T> {
 
     void resolve();
+
+    @Override
+    default boolean isLowLevel() {
+        return false;
+    }
+
+    @Override
+    default boolean isHighLevel() {
+        return false;
+    }
+
+    @Override
+    default boolean isContextualOnly() {
+        return true;
+    }
+
+    @Override
+    default ContextualArgument<T> asContextualArgument() {
+        return this;
+    }
+
+    @Override
+    default boolean isUnresolved() {
+        return false;
+    }
+
+    @Override
+    default boolean isVarArgsArgument() {
+        return false;
+    }
 }

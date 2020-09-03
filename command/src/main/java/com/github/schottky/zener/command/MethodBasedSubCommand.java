@@ -5,7 +5,7 @@ import com.github.schottky.zener.command.resolver.CommandException;
 import com.github.schottky.zener.command.resolver.Parameter;
 import com.github.schottky.zener.command.resolver.SuccessMessage;
 import com.github.schottky.zener.command.resolver.argument.HighLevelArg;
-import com.github.schottky.zener.command.resolver.argument.LowLevelArg;
+import com.github.schottky.zener.command.util.LanguageInterface;
 import com.github.schottky.zener.messaging.Console;
 import com.google.common.base.Preconditions;
 import net.md_5.bungee.api.ChatColor;
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @API(status = API.Status.INTERNAL)
 public final class MethodBasedSubCommand<T extends CommandBase> extends SubCommand<T> {
@@ -98,8 +99,10 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
     public ComponentBuilder createCommandSyntax(String rootLabel, CommandContext context) {
         final ComponentBuilder builder = super.createCommandSyntax(rootLabel, context);
         if (subCommands.isEmpty()) {
-            for (String arg: ArgumentResolver.getCommandArguments(parameters, context))
-                builder.append(" ").append(arg).color(ChatColor.AQUA);
+            ArgumentResolver.description(parameters, context).ifPresent(desc ->
+                    builder.append(" ").append(desc).color(ChatColor.AQUA));
+            /*for (String arg: ArgumentResolver.getCommandArguments(parameters, context))
+                builder.append(" ").append(arg).color(ChatColor.AQUA); */
         } else {
             builder.append(" " + name());
         }
@@ -114,18 +117,17 @@ public final class MethodBasedSubCommand<T extends CommandBase> extends SubComma
             @NotNull String[] args)
     {
         final CommandContext context = new CommandContext(sender, command, label, args);
-        final HighLevelArg<?> superArg = new ArgumentResolver(args, context).computeRoot(parameters);
-        final LowLevelArg<?> arg = superArg.findLastArgument(new LinkedList<>(Arrays.asList(args)), context);
-        if (arg == null)
-            return Collections.emptyList();
-        else {
-            try {
-                return arg.optionsAsString()
+        final HighLevelArg<?> superArg = ArgumentResolver.rootArgument(parameters, context);
+        try {
+            final Stream<String> options = superArg.tabOptions(new LinkedList<>(Arrays.asList(args)));
+            if (options == null)
+                return Collections.emptyList();
+            else
+                return options
                         .filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
                         .collect(Collectors.toList());
-            } catch (CommandException e) {
-                return Collections.emptyList();
-            }
+        } catch (CommandException e) {
+            return Collections.emptyList();
         }
     }
 }

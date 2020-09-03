@@ -3,9 +3,9 @@ package com.github.schottky.zener.command.resolver;
 import com.github.schottky.command.mock.MockPlayer;
 import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.argument.AbstractLowLevelArg;
-import com.github.schottky.zener.command.resolver.argument.Argument;
 import com.github.schottky.zener.command.resolver.argument.Arguments;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -83,20 +83,23 @@ class ArgumentResolverTest {
 
     @Nested class The_argument_resolver_resolves_varargs_arguments {
 
-        final Argument<ItemStack> argument = new Arguments.ItemStackArgument(mockContext);
+        final Parameter[] parameters = Parameter.of(ItemStack.class);
 
         @Test
         public void with_min_args() {
-            new ArgumentResolver(new String[] {"ROTTEN_FLESH"}, mockContext).resolve(argument);
-            final ItemStack stack = argument.value();
+            final Object[] objects =
+                    new ArgumentResolver(new String[] {"ROTTEN_FLESH"}, mockContext).resolve(parameters);
+            final ItemStack stack = (ItemStack) objects[0];
             assertSame(Material.ROTTEN_FLESH, stack.getType());
             assertEquals(1, stack.getAmount());
         }
 
         @Test
         public void with_max_args() {
-            new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2"}, mockContext).resolve(argument);
-            final ItemStack stack = argument.value();
+            final Object[] objects =
+                    new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2"}, mockContext).resolve(parameters);
+            ArgumentResolver.registerArgument(Integer.TYPE, Arguments.IntArgument::new);
+            final ItemStack stack = (ItemStack) objects[0];
             assertSame(Material.ROTTEN_FLESH, stack.getType());
             assertEquals(2, stack.getAmount());
         }
@@ -104,15 +107,26 @@ class ArgumentResolverTest {
         @Test
         public void throws_when_too_few_args_are_given() {
             assertThrows(ArgumentNotResolvable.class, () ->
-                    new ArgumentResolver(new String[0], mockContext).resolve(argument));
+                    new ArgumentResolver(new String[0], mockContext).resolve(parameters));
         }
 
         @Test
         public void throws_when_too_many_args_are_given() {
             assertThrows(ArgumentNotResolvable.class, () ->
-                    new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2", "foo"}, mockContext).resolve(argument) );
+                    new ArgumentResolver(new String[] {"ROTTEN_FLESH", "2", "foo"}, mockContext).resolve(parameters) );
         }
 
     }
+
+    @Test
+    public void an_argument_can_resolve_only_unresolved_args() throws NoSuchMethodException {
+        final Parameter[] parameters = Parameter.fromMethod(
+                getClass().getDeclaredMethod("resolveOnly", Player.class));
+        final Object[] objects = new ArgumentResolver(new String[0], mockContext).resolve(parameters);
+        assertEquals(1, objects.length);
+        assertEquals(mockContext.getPlayer(), objects[0]);
+    }
+
+    public void resolveOnly(@Unresolved Player player) { }
 
 }

@@ -6,6 +6,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class Parameter {
 
@@ -17,6 +18,14 @@ public class Parameter {
             final Annotation[] presentAnnotations = Arrays.copyOf(parameterAnnotations[i], parameterAnnotations[i].length);
             final Parameter parameter = new Parameter(parameterTypes[i], presentAnnotations);
             parameters[i] = parameter;
+        }
+        return parameters;
+    }
+
+    public static Parameter[] of (Class<?>... classes) {
+        final Parameter[] parameters = new Parameter[classes.length];
+        for (int i = 0; i < parameters.length; i++) {
+            parameters[i] = new Parameter(classes[i]);
         }
         return parameters;
     }
@@ -38,6 +47,10 @@ public class Parameter {
             if (annotation.annotationType() == type) return true;
         }
         return false;
+    }
+
+    public <A extends Annotation> String annotationValue(Class<A> annotation, Function<A,String> toStringFunction) {
+        return getAnnotation(annotation).map(toStringFunction).orElseThrow(RuntimeException::new);
     }
 
     @SuppressWarnings("unchecked")

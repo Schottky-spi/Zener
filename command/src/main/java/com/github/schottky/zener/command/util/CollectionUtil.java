@@ -1,4 +1,4 @@
-package com.github.schottky.zener.command;
+package com.github.schottky.zener.command.util;
 
 import org.apiguardian.api.API;
 import org.apiguardian.api.API.Status;

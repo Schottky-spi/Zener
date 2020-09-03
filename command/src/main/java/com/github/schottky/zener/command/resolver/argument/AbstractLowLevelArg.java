@@ -2,100 +2,72 @@ package com.github.schottky.zener.command.resolver.argument;
 
 import com.github.schottky.zener.command.CommandContext;
 import com.github.schottky.zener.command.resolver.CommandException;
-import com.github.schottky.zener.localization.Language;
-import org.jetbrains.annotations.Nullable;
+import com.github.schottky.zener.command.util.LanguageInterface;
 
+import java.util.Optional;
+import java.util.Queue;
 import java.util.stream.Stream;
 
 public abstract class AbstractLowLevelArg<T> extends AbstractArgument<T> implements LowLevelArg<T> {
-
-    public AbstractLowLevelArg(CommandContext context, T initialValue) {
-        super(context);
-        this.value = initialValue;
-    }
 
     public AbstractLowLevelArg(CommandContext context) {
         super(context);
     }
 
-    private Stream<T> options = Stream.empty();
+    @Override
+    public void setOptions(Stream<String> options) {
+        this.options = options;
+    }
+
+    private Stream<String> options = Stream.empty();
 
     @Override
-    public Stream<T> options() throws CommandException {
-        checkPermission();
+    public Stream<String> optionsAsString() {
         return options;
     }
 
     @Override
-    public Stream<String> optionsAsString() {
-        checkPermission();
-        return options.map(this::toString);
-    }
-
-    @Override
-    public String toString(T value) {
-        return value.toString();
-    }
-
-    public AbstractLowLevelArg<T> withOptions(Stream<T> options) {
-        this.options = options;
-        return this;
-    }
-
-    private T value;
-
-    @Override
-    public T value() {
-        return value;
-    }
-
-    @Override
-    public void resolve(String arg) {
-        checkPermission();
-        this.value = fromArgument(arg);
+    public boolean resolve(Queue<String> arguments) {
+        if (arguments.isEmpty()) return false;
+        this.value = fromArgument(arguments.poll());
+        return true;
     }
 
     protected abstract T fromArgument(String arg);
 
-    protected String description;
+    @Override
+    public void setDescription(String description, boolean isOptional) {
+        this.description = description;
+        this.optionalArg = isOptional;
+    }
 
     @Override
-    public @Nullable String description() {
-        if (description == null) return null;
-        checkPermission();
-        return optionalArg ? "[" + description + "]" : "<" + description + ">";
+    public Stream<String> tabOptions(Queue<String> arguments) {
+        if (arguments.isEmpty()) {
+            return null;
+        } else {
+            final String value = arguments.poll();
+            if (arguments.isEmpty()) {
+                return optionsAsString();
+            } else {
+                try {
+                    fromArgument(value);
+                    return optionsAsString();
+                } catch (CommandException e) {
+                    return null;
+                }
+            }
+        }
     }
 
-    public AbstractLowLevelArg<T> withDescription(String description, boolean optional) {
-        this.optionalArg = optional;
-        return this.withDescription(description);
-    }
-
-    public AbstractLowLevelArg<T> withDescription(String description) {
-        if (Language.isValidIdentifier(description))
-            this.description = Language.current().translate(description);
-        else
-            this.description = description;
-        return this;
-    }
+    protected String description;
 
     private boolean optionalArg = false;
 
-    public AbstractLowLevelArg<T> setOptional(boolean optionalArg) {
-        this.optionalArg = optionalArg;
-        return this;
+    @Override
+    public Optional<String> description() {
+        if (description == null) return Optional.empty();
+        final String translated = LanguageInterface.translateIdentifier(description);
+        return Optional.of(optionalArg ? "[" + translated + "]" : "<" + translated + ">");
     }
-
-    private String permission;
-
-    public AbstractLowLevelArg<T> requirePermission(String permission) {
-        this.permission = permission;
-        return this;
-    }
-
-    private void checkPermission() {
-        if (permission != null && !context.getSender().hasPermission(permission))
-            throw new CommandException("You do not have permission");
-    }
-
 }

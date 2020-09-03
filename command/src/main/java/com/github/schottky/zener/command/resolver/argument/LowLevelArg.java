@@ -1,17 +1,28 @@
 package com.github.schottky.zener.command.resolver.argument;
 
-import com.github.schottky.zener.command.resolver.CommandException;
-
 import java.util.stream.Stream;
 
 public interface LowLevelArg<T> extends Argument<T> {
 
-    Stream<T> options() throws CommandException;
-
-    String toString(T value);
-
-    void resolve(String arg);
+    void setDescription(String description, boolean isOptional);
 
     Stream<String> optionsAsString();
 
+    void setOptions(Stream<String> options);
+
+    @Override
+    default boolean isLowLevel()        { return true; }
+    @Override
+    default boolean isHighLevel()       { return false; }
+    @Override
+    default boolean isContextualOnly()  { return false; }
+    @Override
+    default boolean isUnresolved()      { return false; }
+    @Override
+    default boolean isVarArgsArgument() { return false; }
+
+    @Override
+    default LowLevelArg<T> asLowLevelArg() {
+        return this;
+    }
 }

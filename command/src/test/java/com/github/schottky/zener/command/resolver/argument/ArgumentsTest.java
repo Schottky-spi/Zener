@@ -23,14 +23,13 @@ class ArgumentsTest {
         @ParameterizedTest
         @ValueSource(ints = {-100, -50, 0, 49, 100})
         public void will_be_converted_to_its_value(int actual) throws CommandException {
-            intArgument.resolve(String.valueOf(actual));
-            assertEquals(actual, intArgument.value());
+            assertEquals(actual, intArgument.fromArgument(String.valueOf(actual)));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"1.0", "ab", "2e3"})
         public void throws_when_given_an_incorrect_input(String input) {
-            assertThrows(ArgumentNotResolvable.class, () -> intArgument.resolve(input));
+            assertThrows(ArgumentNotResolvable.class, () -> intArgument.fromArgument(input));
         }
     }
 
@@ -41,14 +40,13 @@ class ArgumentsTest {
         @ParameterizedTest
         @ValueSource(doubles = {-100, -10.0, -23.456, 0.0, 3.14, 100})
         public void will_be_converted_to_its_value(double actual) {
-            doubleArgument.resolve(String.valueOf(actual));
-            assertEquals(actual, doubleArgument.value());
+            assertEquals(actual, doubleArgument.fromArgument(String.valueOf(actual)));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"seven.0", "a", "3.1a", "b"})
         public void throws_when_given_an_incorrect_input(String input) {
-            assertThrows(ArgumentNotResolvable.class, () -> doubleArgument.resolve(input));
+            assertThrows(ArgumentNotResolvable.class, () -> doubleArgument.fromArgument(input));
         }
     }
 
@@ -59,8 +57,7 @@ class ArgumentsTest {
         @ParameterizedTest
         @ValueSource(strings = {"Hello", "World", "42", ""})
         public void will_be_converted_to_its_value(String actual) {
-            stringArgument.resolve(actual);
-            assertEquals(actual, stringArgument.value());
+            assertEquals(actual, stringArgument.fromArgument(actual));
         }
     }
 
@@ -71,14 +68,13 @@ class ArgumentsTest {
         @ParameterizedTest
         @CsvSource(value = {"true, true", "True, true", "TRUE, true", "false, false", "False, false", "FALSE, false"})
         public void will_be_converted_to_its_value(String value, boolean actual) {
-            booleanArgument.resolve(value);
-            assertEquals(actual, booleanArgument.value());
+            assertEquals(actual, booleanArgument.fromArgument(value));
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"flase", "rtue", "0", "1", "xyz"})
         public void throws_when_given_an_incorrect_input(String input) {
-            assertThrows(ArgumentNotResolvable.class, () -> booleanArgument.resolve(input));
+            assertThrows(ArgumentNotResolvable.class, () -> booleanArgument.fromArgument(input));
         }
     }
 

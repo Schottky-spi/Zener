@@ -2,6 +2,7 @@ package com.github.schottky.zener.command;
 
 import com.github.schottky.command.TestCommand;
 import com.github.schottky.command.mock.MockServer;
+import com.github.schottky.zener.command.util.LanguageInterface;
 import org.bukkit.Bukkit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class LanguageInterfaceTest {
             super(parentCommand);
         }
 
-        @SubCmd("subSubCmd")
+        @SubCmd(value = "subSubCmd", permission = "x")
         public void subCmd() {}
     }
 
@@ -39,7 +40,10 @@ class LanguageInterfaceTest {
         final TestCommand parent = new TestCommand();
         final TestSubCommand subCommand = new TestSubCommand(parent);
         parent.registerSubCommands(subCommand);
-        final SubCommand<?> subCommand1 = subCommand.subCommands.iterator().next();
+        SubCommand<?> subCommand1 = null;
+        for (SubCommand<?> command: subCommand.subCommands) {
+            if (command.name().equals("subSubCmd")) subCommand1 = command;
+        }
 
         assertEquals("test", LanguageInterface.generateTranslationKey(parent.path()));
         assertEquals("test.sub_cmd", LanguageInterface.generateTranslationKey(subCommand.path()));

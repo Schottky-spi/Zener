@@ -28,6 +28,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -255,7 +257,16 @@ public class MockServer implements Server {
 
     @Override
     public @Nullable PluginCommand getPluginCommand(@NotNull String name) {
-        throw new UnsupportedOperationException();
+        try {
+            Constructor<PluginCommand> ctor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+            ctor.setAccessible(true);
+            final PluginCommand cmd = ctor.newInstance(name, new MockPlugin());
+            cmd.setPermission("x");
+            return cmd;
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

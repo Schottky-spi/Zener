@@ -1,5 +1,7 @@
-package com.github.schottky.zener.command;
+package com.github.schottky.zener.command.util;
 
+import com.github.schottky.zener.command.CommandBase;
+import com.github.schottky.zener.localization.Language;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.util.List;
@@ -41,7 +43,22 @@ public class LanguageInterface {
         return joiner.toString();
     }
 
+    public static String translate(List<CommandBase> path, String useCase) {
+        return Language.current().translate(generateTranslationKeyFor(useCase, path));
+    }
+
     public static String generateTranslationKey(List<CommandBase> path) {
         return generateTranslationKey(path, CommandBase::name);
+    }
+
+    public static String generateTranslationKeyFor(String useCase, List<CommandBase> path) {
+        return "command." + generateTranslationKey(path) + "." + useCase;
+    }
+    
+    public static String translateIdentifier(String identifier) {
+        if (!Language.isValidIdentifier(identifier))
+            return identifier;
+        else
+            return Language.current().translate("command.ident." + identifier);
     }
 }

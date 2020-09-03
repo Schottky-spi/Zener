@@ -8,7 +8,6 @@ import com.github.schottky.command.mock.MockServer;
 import org.bukkit.Bukkit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,21 +24,6 @@ class MethodBasedSubCommandTest {
     @BeforeEach
     public void setup() {
         base = new TestCommand();
-    }
-
-    @Nested class When_the_test_command_gets_created {
-
-        @Test
-        public void it_registers_all_sub_commands() {
-            assertEquals(1, base.subCommands.size());
-        }
-
-        @Test
-        public void the_sub_commands_are_method_based_sub_commands() {
-            for (SubCommand<?> subCommand: base.subCommands) {
-                assertEquals(MethodBasedSubCommand.class, subCommand.getClass());
-            }
-        }
     }
 
     private void dispatchCommand(String... args) {

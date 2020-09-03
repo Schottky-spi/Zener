@@ -1,5 +1,9 @@
 package com.github.schottky.zener.command;
 
+import com.github.schottky.zener.command.util.ArrayUtil;
+import com.github.schottky.zener.command.util.CollectionUtil;
+import com.github.schottky.zener.command.util.LanguageInterface;
+import com.github.schottky.zener.command.util.ReflectionUtil;
 import com.github.schottky.zener.localization.Language;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -29,7 +33,10 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
                 "command.not_executable_as_console", "&6You cannot execute this as console",
                 "command.too_few_arguments", "&6Too few arguments! Provide at least {args}",
                 "command.too_many_arguments", "&6Too many arguments!",
-                "command.not_executable_as", "&6You cannot execute this command");
+                "command.not_executable_as", "&6You cannot execute this command",
+                "command.ident.material", "type",
+                "command.ident.player", "player",
+                "command.ident.amount", "amount");
     }
 
     /**The permission a {@link org.bukkit.permissions.Permissible} must have to execute this command*/
@@ -83,6 +90,8 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             for (SubCommand<?> subCommand: base.subCommands)
                 sender.spigot().sendMessage(subCommand.createDescription(label, context).create());
             return true;
+        } else if (arguments[0].equalsIgnoreCase("help")) {
+            sender.sendMessage(generateHelpPage());
         }
 
         if (newArgs.length < base.minArgsLength) {
@@ -93,6 +102,14 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
             return true;
         }
         return base.onAcceptedCommand(sender, command, labelUsed(base, arguments, label), newArgs);
+    }
+
+    protected String[] generateHelpPage() {
+        return new String[] {
+                this.toString(),
+                "",
+                LanguageInterface.translate(path(), "long_description")
+        };
     }
 
     private String labelUsed(@NotNull CommandBase base, String[] args, String originalLabel) {
@@ -326,6 +343,20 @@ public abstract class CommandBase implements CommandExecutor, TabCompleter {
         return Language.current().hasMappingFor(shortDescription) ?
                 Language.current().translate(shortDescription) :
                 null;
+    }
+
+    protected String longDescription;
+
+    public String longDescription() {
+        if (shortDescription == null || shortDescription.isEmpty()) {
+            final String translationKey = LanguageInterface
+                    .generateTranslationKeyFor("long_description", path());
+            return Language.current().hasMappingFor(translationKey) ?
+                    Language.current().translate(translationKey) :
+                    null;
+        } else {
+            return shortDescription;
+        }
     }
 
     /**
