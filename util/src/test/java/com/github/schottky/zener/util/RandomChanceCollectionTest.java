@@ -1,6 +1,6 @@
 package com.github.schottky.zener.util;
 
-import com.github.schottky.zener.api.Tuple;
+import com.github.schottky.zener.util.RandomChanceCollection.WeightedElement;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,20 +40,20 @@ class RandomChanceCollectionTest {
         }
     }
 
-    List<Tuple<Double,String>> testValues = Lists.newArrayList(
-            Tuple.of(50.0, "Hello"),
-            Tuple.of(25.0, "World"),
-            Tuple.of(25.0, "foo"),
-            Tuple.of(75.0, "bar"));
+    List<RandomChanceCollection.WeightedElement<String>> testValues = Lists.newArrayList(
+            RandomChanceCollection.weightedElement(50.0, "Hello"),
+            RandomChanceCollection.weightedElement(25.0, "World"),
+            RandomChanceCollection.weightedElement(25.0, "foo"),
+            RandomChanceCollection.weightedElement(75.0, "bar"));
 
     Map<String,Object> rawMap = setupRawMap();
 
     public Map<String,Object> setupRawMap() {
         Map<String,Object> rawMap = new HashMap<>();
         int sum = 0;
-        for (Tuple<Double,String> tuple: testValues) {
-            rawMap.put(String.valueOf(tuple.first() + sum), tuple.second());
-            sum += tuple.first();
+        for (WeightedElement<String> tuple: testValues) {
+            rawMap.put(String.valueOf(tuple.weight() + sum), tuple.element());
+            sum += tuple.weight();
         }
         return rawMap;
     }
@@ -86,10 +86,10 @@ class RandomChanceCollectionTest {
         public void can_remove_values(double weight, String element) {
             RandomChanceCollection<String> randomChanceCollection = RandomChanceCollection.of(testValues);
             boolean changed = randomChanceCollection.remove(weight, element);
-            Collection<Tuple<Double,String>> expected = new ArrayList<>(testValues);
-            expected.remove(new Tuple<>(weight, element));
+            Collection<WeightedElement<String>> expected = new ArrayList<>(testValues);
+            expected.remove(new WeightedElement<>(weight, element));
 
-            assertEquals(expected.stream().mapToDouble(Tuple::first).sum(), randomChanceCollection.sumOfWeights());
+            assertEquals(expected.stream().mapToDouble(WeightedElement::weight).sum(), randomChanceCollection.sumOfWeights());
             assertTrue(changed);
             assertIterableEquals(expected, randomChanceCollection);
         }
@@ -137,7 +137,8 @@ class RandomChanceCollectionTest {
         @ParameterizedTest
         @ValueSource(ints = 2000)
         public void are_approximately_randomly_distributed(int repetitions) {
-            Map<String,Double> rate = Tuple.appendToMap(testValues, new HashMap<>(), tuple -> Tuple.of(tuple.second(), 0.0));
+            Map<String, Double> rate = new HashMap<>();
+            testValues.forEach(e -> rate.put(e.element(), 0.0));
 
             RandomChanceCollection<String> randomChanceCollection = new RandomChanceCollection<>(testValues);
             for (int i = 0; i < repetitions; i++) {
@@ -145,7 +146,8 @@ class RandomChanceCollectionTest {
                 rate.computeIfPresent(randomElement, (ignored, d) -> d + 1);
             }
             rate.replaceAll((ignored, d) -> d / (double) repetitions);
-            Map<String,Double> expected = Tuple.appendToMap(testValues, new HashMap<>(), Tuple::permuted);
+            Map<String, Double> expected = new HashMap<>();
+            testValues.forEach(e -> expected.put(e.element(), e.weight()));
             double sum = expected.values().stream().mapToDouble(d -> d).sum();
             expected.replaceAll((ignored, d) -> d / sum);
 

@@ -1,6 +1,5 @@
 package com.github.schottky.zener.util;
 
-import com.github.schottky.zener.api.Tuple;
 import com.google.common.base.Preconditions;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.Contract;
@@ -16,7 +15,7 @@ import java.util.function.Consumer;
  * A collection that allows weighted elements and has the special function
  * {@link RandomChanceCollection#randomElement()} to retrieve a randomly chosen
  * element based on it's weight. There are two views to this collection.
- * <br> The external view is that this collection represents a {@link Collection} of {@link Tuple}'s.
+ * <br> The external view is that this collection represents a {@link Collection} of {@link WeightedElement}'s.
  * Each tuple contains the weight (a double) and and the element that is assigned to this weight.
  * This view is reflected by typical collection-calls such as {@link Collection#add(Object)},
  * {@link Collection#remove(Object)},...
@@ -28,13 +27,14 @@ import java.util.function.Consumer;
  * <br> Iterating over the collection and removing elements, however, is not directly done on the map and can therefore
  * not be performed in a manner that would be expected for a map. Especially remove-operations are expensive since they
  * have to re-populate the internal map and should thus be avoided.
- * The only exception to this rule is the removal of the last element wince that only removes the last element and does
+ * The only exception to this rule is the removal of the last element since that only removes the last element and does
  * not have to clear the internal map.
  * <br> The only place where the internal view is the external view is during serialization
  * @param <E> The type of elements to store / receive
  */
 
-public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E>> implements ConfigurationSerializable {
+public class RandomChanceCollection<E> extends
+        AbstractCollection<RandomChanceCollection.WeightedElement<E>> implements ConfigurationSerializable {
 
     private final Random random;
 
@@ -55,11 +55,11 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
     }
 
     /**
-     * constructs a new RandomChanceCollection using {@link ThreadLocalRandom#current()}
+     * constructs a new RandomChanceCollection using a new {@link Random}
      */
 
     public RandomChanceCollection() {
-        this(ThreadLocalRandom.current());
+        this(new Random());
     }
 
     /**
@@ -69,7 +69,7 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      * @param initialValues The initial values of this collection
      */
 
-    public RandomChanceCollection(Random random, Collection<Tuple<Double,E>> initialValues) {
+    public RandomChanceCollection(Random random, Collection<WeightedElement<E>> initialValues) {
         this(random);
         this.addAll(initialValues);
     }
@@ -80,7 +80,7 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      * @param initialValues The initial values of this collection
      */
 
-    public RandomChanceCollection(Collection<Tuple<Double,E>> initialValues) {
+    public RandomChanceCollection(Collection<WeightedElement<E>> initialValues) {
         this(ThreadLocalRandom.current(), initialValues);
     }
 
@@ -95,7 +95,7 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      */
 
     @Contract("_ -> new")
-    public static <E> @NotNull RandomChanceCollection<E> of(Collection<Tuple<Double,E>> initialValues) {
+    public static <E> @NotNull RandomChanceCollection<E> of(Collection<WeightedElement<E>> initialValues) {
         return new RandomChanceCollection<>(initialValues);
     }
 
@@ -108,12 +108,12 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      */
 
     @Override
-    public @NotNull Iterator<Tuple<Double, E>> iterator() {
+    public @NotNull Iterator<WeightedElement<E>> iterator() {
         return new Itr(internalMap.entrySet().iterator());
     }
 
     // iterator-implementation
-    private class Itr implements Iterator<Tuple<Double,E>> {
+    private class Itr implements Iterator<WeightedElement<E>> {
 
         private final Iterator<Map.Entry<Double,E>> entryIterator;
         private Map.Entry<Double,E> current;
@@ -129,11 +129,11 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
         }
 
         @Override
-        public Tuple<Double, E> next() {
+        public WeightedElement<E> next() {
             this.current = entryIterator.next();
             double weight = current.getKey() - total;
             this.total = current.getKey();
-            return Tuple.of(weight, current.getValue());
+            return new WeightedElement<>(weight, current.getValue());
         }
 
         @Override
@@ -201,8 +201,8 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      */
 
     @Override
-    public boolean add(@NotNull Tuple<Double,E> tuple) {
-        return this.add(tuple.first(), tuple.second());
+    public boolean add(@NotNull WeightedElement<E> tuple) {
+        return this.add(tuple.weight, tuple.element);
     }
 
     /**
@@ -213,7 +213,7 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      */
 
     public boolean remove(double weight, E element) {
-        return remove(new Tuple<>(weight, element));
+        return remove(new WeightedElement<>(weight, element));
     }
 
     /**
@@ -234,7 +234,7 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
      */
 
     public void forEach(BiConsumer<? super Double,? super E> action) {
-        this.forEach(tuple -> action.accept(tuple.first(), tuple.second()));
+        this.forEach(tuple -> action.accept(tuple.weight, tuple.element));
     }
 
     /**
@@ -337,5 +337,42 @@ public class RandomChanceCollection<E> extends AbstractCollection<Tuple<Double,E
             this.internalMap.put(d, (E) entry.getValue());
         }
         this.total = internalMap.lastKey();
+    }
+
+    static class WeightedElement<E> {
+
+        private final double weight;
+        private final E element;
+
+        public WeightedElement(double weight, E element) {
+            this.weight = weight;
+            this.element = element;
+        }
+
+        public double weight() {
+            return weight;
+        }
+
+        public E element() {
+            return element;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            WeightedElement<?> that = (WeightedElement<?>) o;
+            return Double.compare(that.weight, weight) == 0 &&
+                    Objects.equals(element, that.element);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(weight, element);
+        }
+    }
+
+    public static <E> WeightedElement<E> weightedElement(double weight, E element) {
+        return new WeightedElement<>(weight, element);
     }
 }
